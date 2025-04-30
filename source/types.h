@@ -17,14 +17,16 @@ struct Track
     float height;
 };
 
-struct Frame
+struct Frame_Detection
 {
     uint32_t frame_id;
     std::chrono::system_clock::time_point timestamp;
-    union {
-        std::vector<Detection> detections;
-        std::vector<Track> tracks;
-    };
+    std::vector<Detection> detections;
 };
 
-
+struct Frame_Track
+{
+    uint32_t frame_id;
+    std::chrono::system_clock::time_point timestamp;
+    std::vector<Track> tracks;
+};
