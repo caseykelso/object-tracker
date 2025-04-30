@@ -18,6 +18,11 @@ or
 make
 ```
 
+# Run
+```bash
+make run
+```
+
 # Tests
 ```bash
 make tests

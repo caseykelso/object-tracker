@@ -20,12 +20,16 @@ endif
 
 ci: init build
 
-build: .FORCE
-	mkdir -p $(BUILD.DIR)
-
 init: .FORCE
 	mkdir -p $(DOWNLOADS.DIR)
 	mkdir -p $(INSTALLED.HOST.DIR)
+
+build: .FORCE
+	mkdir -p $(BUILD.DIR)
+	cd $(BUILD.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(SOURCE.DIR) && make -j$(J) install
+
+run: .FORCE
+	$(INSTALLED.HOST.DIR)/bin/tracker-rbr
 
 clean: .FORCE
 	rm -rf $(DOWNLOADS.DIR) && rm -rf $(INSTALLED.HOST.DIR) && rm -rf $(BUILD.DIR) && rm -f $(BASE.DIR)/tags

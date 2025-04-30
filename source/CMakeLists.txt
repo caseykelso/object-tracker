@@ -1,0 +1,10 @@
+cmake_minimum_required (VERSION 3.20)
+project(tracker-rbr)
+add_executable(tracker-rbr main.cpp)
+add_library(tracker tracker.cpp)
+include_directories(BEFORE ${CMAKE_PREFIX_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_directories(tracker BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
+target_link_libraries(tracker gpiod pthread rt)
+set_property(TARGET tracker PROPERTY CXX_STANDARD 17)
+install(TARGETS tracker-rbr DESTINATION bin)
+
