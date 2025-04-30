@@ -14,7 +14,6 @@ namespace {
 
     TEST(TrackerTests, SINGLE_OBJECT)
     {
-        std::vector<Object2D> detections;
         std::map<int, Object2D> tracks;
 
         cv::Point2d centroid;
@@ -34,31 +33,32 @@ namespace {
 
 
         json j_object = json::parse(j);
-        centroid.x = j_object["detections"][0]["x"].get<float>(); //ASSUMPTION - the position is the center of the 2D object, coordinate space isn't defined from a corner
-        centroid.y = j_object["detections"][0]["y"].get<float>();
-        Object2D detection = {centroid, j_object["detections"][0]["width"].get<double>(), j_object["detections"][0]["height"].get<double>()};
 
-        detections.push_back(detection);
-        tracks = update(detections);
+        auto detections = json_to_detections(j_object);
 
-
-        int first_object_id      = -1;
-        uint8_t number_of_tracks = 0;
-        Object2D o;
-
-        for (auto& [object_id, object] : tracks)
+        for (const auto& detection : detections)
         {
-            first_object_id = object_id;
-            o = object;
-            ++number_of_tracks;
-        }
+            auto objects    = detections_to_object2d(detection);
+            tracks = update(objects);
 
-       EXPECT_EQ(0, first_object_id);
-       EXPECT_EQ(1, number_of_tracks); 
-       EXPECT_EQ(0.05, o.width);
-       EXPECT_EQ(0.1, o.height);
-       EXPECT_NEAR(0.65, o.centroid.x, 1e-5);
-       EXPECT_NEAR(0.42, o.centroid.y, 1e-5);
+            int first_object_id      = -1;
+            uint8_t number_of_tracks = 0;
+            Object2D o;
+
+            for (auto& [object_id, object] : tracks)
+            {
+                first_object_id = object_id;
+                o = object;
+                ++number_of_tracks;
+            }
+
+           EXPECT_EQ(0, first_object_id);
+           EXPECT_EQ(1, number_of_tracks); 
+           EXPECT_NEAR(0.05, o.width, 1e-5);
+           EXPECT_NEAR(0.1, o.height, 1e-5);
+           EXPECT_NEAR(0.65, o.centroid.x, 1e-5);
+           EXPECT_NEAR(0.42, o.centroid.y, 1e-5);
+        }
     }
 
     TEST(TrackerTests, DESERIALIZE_JSON)
