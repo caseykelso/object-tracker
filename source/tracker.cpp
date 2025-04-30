@@ -6,10 +6,17 @@
 #include "types.h"
 #include "tracker.h"
 
-uint32_t next_object_id;
+
 std::map<int, Object2D> objects;
+uint32_t next_object_id;
 double max_distance;
 const double max_disappeared = 20;
+
+void tracker_clear() //TODO: this is janky, create a class to with constructors/destructors and properly manage memory lifecycle
+{
+    objects.clear();
+    next_object_id = 0;
+}
 
 void register_object(const cv::Point2d& centroid, double width, double height)
 {

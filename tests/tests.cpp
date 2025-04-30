@@ -12,9 +12,185 @@ using json = nlohmann::json;
 
 namespace {
 
+
+    TEST(TrackerTests, THREE_OBJECTS_TWO_FRAMES_NO_DISAPPEAR)
+    {
+        std::map<int, Object2D> tracks;
+        tracker_clear(); // this should live in googletest.Setup() overide, or refactor tractor to properly use RAII
+
+        cv::Point2d centroid;
+
+        std::string j = R"(
+[
+  {
+    "frame_id": 123,
+    "timestamp": "2025-03-24T18:00:00Z",
+    "detections": [
+      {
+        "x": 0.65,
+        "y": 0.42,
+        "width": 0.05,
+        "height": 0.05
+      },
+      {
+        "x": 0.32,
+        "y": 0.78,
+        "width": 0.04,
+        "height": 0.06
+      }
+    ]
+  },
+  {
+    "frame_id": 124,
+    "timestamp": "2025-03-24T18:00:01Z",
+    "detections": [
+      {
+        "x": 0.66,
+        "y": 0.43,
+        "width": 0.05,
+        "height": 0.05
+      },
+      {
+        "x": 0.33,
+        "y": 0.79,
+        "width": 0.04,
+        "height": 0.06
+      }
+    ]
+  },
+  {
+    "frame_id": 125,
+    "timestamp": "2025-03-24T18:00:02Z",
+    "detections": [
+      {
+        "x": 0.67,
+        "y": 0.44,
+        "width": 0.05,
+        "height": 0.05
+      },
+      {
+        "x": 0.34,
+        "y": 0.80,
+        "width": 0.04,
+        "height": 0.06
+      },
+      {
+        "x": 0.51,
+        "y": 0.22,
+        "width": 0.03,
+        "height": 0.03
+      }
+    ]
+  }
+]
+        )";
+
+
+        json j_object = json::parse(j);
+        auto detections = json_to_detections(j_object);
+
+        uint8_t i = 0;
+
+        for (const auto& detection : detections)
+        {
+            auto objects    = detections_to_object2d(detection);
+            tracks = update(objects);
+
+            int last_object_id      = -1;
+            uint8_t number_of_tracks = 0;
+            Object2D o;
+
+            for (auto& [object_id, object] : tracks)
+            {
+                last_object_id = object_id;
+                o = object;
+                ++number_of_tracks;
+            }
+
+            if (0 == i) // first frame
+            {
+                EXPECT_EQ(2, number_of_tracks); 
+            }
+            else if (1 == i) // second frame
+            {
+                EXPECT_EQ(3, number_of_tracks); 
+            }
+            else // third frame
+            {
+                EXPECT_EQ(3, number_of_tracks);
+            }
+
+            ++i;
+        }
+    }
+
+
+
+    TEST(TrackerTests, THREE_OBJECTS_ONE_FRAME)
+    {
+        std::map<int, Object2D> tracks;
+        tracker_clear(); // this should live in googletest.Setup() overide, or refactor tractor to properly use RAII
+
+        cv::Point2d centroid;
+
+        std::string j = R"({
+                         "frame_id": 123,
+                         "timestamp": "2025-03-24T18:33:22Z",
+                         "detections": [
+                         {
+                             "x": 0.65,
+                             "y": 0.42,
+                             "width": 0.05,
+                             "height": 0.10
+                         },
+                         {
+                             "x": 0.11,
+                             "y": 0.22,
+                             "width": 0.33,
+                             "height": 0.44
+                         },
+                         {
+                             "x": 0.65,
+                             "y": 0.42,
+                             "width": 0.05,
+                             "height": 0.10
+                         }
+                        ]
+                       })";
+
+
+        json j_object = json::parse(j);
+
+        auto detections = json_to_detections(j_object);
+
+        uint8_t i = 0;
+
+        for (const auto& detection : detections)
+        {
+            auto objects    = detections_to_object2d(detection);
+            tracks = update(objects);
+
+            int last_object_id      = -1;
+            uint8_t number_of_tracks = 0;
+            Object2D o;
+
+            for (auto& [object_id, object] : tracks)
+            {
+                last_object_id = object_id;
+                o = object;
+                ++number_of_tracks;
+            }
+
+             EXPECT_EQ(3, number_of_tracks); 
+        }
+    }
+
+
+
     TEST(TrackerTests, SINGLE_OBJECT)
     {
         std::map<int, Object2D> tracks;
+        tracker_clear();
 
         cv::Point2d centroid;
 
@@ -183,6 +359,26 @@ namespace {
             }
         }
     }
+
+    TEST(TrackerTests, OBJECT2D_TO_TRACK)
+    {
+        Object2D o;
+
+        o.width      = 0.1;
+        o.height     = 0.2;
+        o.centroid.x = 0.05;
+        o.centroid.y = 0.07;
+
+        Track t = object2d_to_track(o, 77);
+
+        EXPECT_EQ(77, t.id);
+        EXPECT_NEAR(0.1, t.width, 1e-5);
+        EXPECT_NEAR(0.2, t.height, 1e-5);
+        EXPECT_NEAR(0.05, o.centroid.x, 1e-5);
+        EXPECT_NEAR(0.07, o.centroid.y, 1e-5);
+    }
+
+
 
 int main (int argc, char** argv)
 {

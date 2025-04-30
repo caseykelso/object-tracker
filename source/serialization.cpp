@@ -7,9 +7,38 @@
 #include "types.h"
 #include "serialization.h"
 
-std::vector<Frame_Detection> json_to_detections(nlohmann::json j)
+void print_track(const Track &t)
 {
-    std::vector<Frame_Detection> result;
+    std::cout << "-----------------------" << std::endl;
+    std::cout << "id: " << t.id << std::endl;
+    std::cout << "x : " << t.x  << std::endl;
+    std::cout << "y : " << t.y << std::endl;
+    std::cout << "width: " << t.width << std::endl;
+    std::cout << "height: " << t.height << std::endl;
+}
+
+void print_tracks(const std::vector<Track> &tracks)
+{
+    for (const auto &t : tracks)
+    {
+        print_track(t);
+    }
+}
+
+Track object2d_to_track(const Object2D &o, uint32_t id)
+{
+   Track result;
+   result.id     = id;
+   result.x      = o.centroid.x;
+   result.y      = o.centroid.y;
+   result.width  = o.width;
+   result.height = o.height;
+
+   return result;
+}
+
+Frame_Detection json_to_detection(nlohmann::json j) // parse a single frame
+{
     Frame_Detection f;
 
     std::string s(j["timestamp"]);
@@ -38,7 +67,28 @@ std::vector<Frame_Detection> json_to_detections(nlohmann::json j)
         f.detections.push_back(d);
     }
 
-    result.push_back(f);
+    return f;
+}
+
+std::vector<Frame_Detection> json_to_detections(nlohmann::json j)
+{
+    std::vector<Frame_Detection> result;
+
+    if (j.is_array())
+    {
+
+       for (const auto &jf : j)
+       {
+           Frame_Detection f;
+           f = json_to_detection(jf);
+           result.push_back(f);
+       }
+    }
+    else
+    {
+       Frame_Detection f = json_to_detection(j); 
+       result.push_back(f);
+    }
 
     return result;
 }
