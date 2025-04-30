@@ -5,7 +5,6 @@
 #include "types.h"
 #include <opencv2/opencv.hpp>
 #include "munkres.h"
-#include "adapters/boostmatrixadapter.h"
 
 struct Object3D
 {
@@ -98,7 +97,7 @@ std::map<int, Object3D> update(const std::vector<std::tuple<cv::Point3d, double,
     }
 
     // Compute the cost matrix for the Hungarian algorithm
-    cv::Mat cost_matrix(object_centroids.size(), input_centroids.size(), CV_64F);
+    cv::Mat_<int> cost_matrix(object_centroids.size(), input_centroids.size(), CV_64F);
     
     for (size_t i = 0; i < object_centroids.size(); i++) 
     {
@@ -119,11 +118,9 @@ std::map<int, Object3D> update(const std::vector<std::tuple<cv::Point3d, double,
     {
         assignment[i] = -1;
     }
-   
-//    Munkres<double> m;
- //   m.solve(cost_matrix); 
-    // Using OpenCV's built-in Hungarian algorithm solver
-//    double cost = cv::hungarianOptimization(cost_matrix_clone, assignment);
+ 
+     Munkres m;  
+     m.solve(cost_matrix); 
 
     // Process assignments
     std::vector<bool> used_rows(object_centroids.size(), false);

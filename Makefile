@@ -19,7 +19,8 @@ MUNKRES.VERSION=1.0.0
 MUNKRES.ARCHIVE=v$(MUNKRES.VERSION).tar.gz
 MUNKRES.URL=https://github.com/saebyn/munkres-cpp/archive/refs/tags/$(MUNKRES.ARCHIVE)
 MUNKRES.BUILD=$(DOWNLOADS.DIR)/build.munkres
-MUNKRES.DIR=$(DOWNLOADS.DIR)/munkres-cpp-$(MUNKRES.VERSION)
+MUNKRES.DIR=$(DOWNLOADS.DIR)/munkres-opencv
+#MUNKRES.DIR=$(DOWNLOADS.DIR)/munkres-cpp-$(MUNKRES.VERSION)
 ifndef INSTALLED_HOST_DIR
 INSTALLED.HOST.DIR=$(BASE.DIR)/installed.host
 else
@@ -39,12 +40,15 @@ init: .FORCE
 
 munkres: .FORCE
 	rm -rf $(MUNKRES.BUILD) && mkdir -p $(MUNKRES.BUILD)
-	cd $(DOWNLOADS.DIR) && rm -f $(MUNKRES.ARCHIVE) && wget $(MUNKRES.URL) && tar xvf $(MUNKRES.ARCHIVE)
-	patch -p0 < munkres.patch $(MUNKRES.DIR)/CMakeLists.txt
-	patch -p0 < munkres_adapters.patch $(MUNKRES.DIR)/src/adapters/CMakeLists.txt
-	cd $(MUNKRES.BUILD) && cmake -DBOOST_MATRIX_ADAPTER=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(MUNKRES.DIR) && make -j$(J) install
-	cp $(MUNKRES.DIR)/src/adapters/boostmatrixadapter.h $(INSTALLED.HOST.DIR)/include/munkres/adapters # TODO: patch the CMakeLists.txt further and avoid this janky copy
-	cp $(MUNKRES.DIR)/src/adapters/boostmatrixadapter.h $(INSTALLED.HOST.DIR)/include/munkres/adapters
+	rm -rf $(MUNKRES.DIR)
+	#cd $(DOWNLOADS.DIR) && rm -f $(MUNKRES.ARCHIVE) && wget $(MUNKRES.URL) && tar xvf $(MUNKRES.ARCHIVE)
+	cd $(DOWNLOADS.DIR) && rm -f $(MUNKRES.ARCHIVE) && git clone -b cmake https://github.com/caseykelso/munkres-opencv.git
+#	patch -p0 < munkres.patch $(MUNKRES.DIR)/CMakeLists.txt
+#	patch -p0 < munkres_adapters.patch $(MUNKRES.DIR)/src/adapters/CMakeLists.txt
+#	cd $(MUNKRES.BUILD) && cmake -DBOOST_MATRIX_ADAPTER=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(MUNKRES.DIR) && make -j$(J) install
+	cd $(MUNKRES.BUILD) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(MUNKRES.DIR)/src && make -j$(J) install
+#	cp $(MUNKRES.DIR)/src/adapters/boostmatrixadapter.h $(INSTALLED.HOST.DIR)/include/munkres/adapters # TODO: patch the CMakeLists.txt further and avoid this janky copy
+#	cp $(MUNKRES.DIR)/src/adapters/boostmatrixadapter.h $(INSTALLED.HOST.DIR)/include/munkres/adapters
 
 
 run: .FORCE
