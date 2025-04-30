@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  ubuntu:
+    build: .
+    volumes:
+      - ~/.ssh:/root/.ssh:ro
+      - ~/.gitconfig:/root/.gitconfig
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true  # Keep STDIN open
+    tty: true         # Allocate a pseudo-TTY
+

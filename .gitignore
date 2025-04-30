@@ -1,6 +1,7 @@
 *.swp
-build
+build*
 installed.host
 downloads
 tags
+tracks.json
 
