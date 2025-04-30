@@ -34,6 +34,9 @@ init: .FORCE
 run: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
 
+viz: build
+	$(INSTALLED.HOST.DIR)/bin/viz
+
 tests: .FORCE
 	mkdir -p $(BUILD.TESTS.DIR)
 	cd $(BUILD.TESTS.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(TESTS.DIR) && make -j$(J) install

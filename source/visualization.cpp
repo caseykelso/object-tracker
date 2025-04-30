@@ -343,7 +343,7 @@ int main()
             }
 
             // Wait a bit
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            std::this_thread::sleep_for(std::chrono::milliseconds(60));
             frame++;
         }
 
