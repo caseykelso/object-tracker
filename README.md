@@ -6,7 +6,7 @@ sudo apt update -y && sudo apt install nlohmann-json3-dev cmake git build-essent
 ```
 # Initial Build
 ```bash
-make init build
+make ci
 ```
 
 # Build iteratively

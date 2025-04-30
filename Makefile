@@ -18,6 +18,8 @@ else
 INSTALLED.HOST.DIR=$(INSTALLED_HOST_DIR)
 endif
 
+ci: init build
+
 build: .FORCE
 	mkdir -p $(BUILD.DIR)
 
