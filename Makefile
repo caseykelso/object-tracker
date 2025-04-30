@@ -18,7 +18,6 @@ SCRIPTS.DIR=$(BASE.DIR)/scripts
 MUNKRES.VERSION=1.0.0
 MUNKRES.ARCHIVE=v$(MUNKRES.VERSION).tar.gz
 MUNKRES.URL=https://github.com/saebyn/munkres-cpp/archive/refs/tags/$(MUNKRES.ARCHIVE)
-MUNKRES.URL=https://github.com/saebyn/munkres-cpp/archive/refs/tags/$(MUNKRES.ARCHIVE)
 MUNKRES.BUILD=$(DOWNLOADS.DIR)/build.munkres
 MUNKRES.DIR=$(DOWNLOADS.DIR)/munkres-cpp-$(MUNKRES.VERSION)
 ifndef INSTALLED_HOST_DIR
