@@ -33,9 +33,7 @@ std::vector<Frame_Detection> json_to_detections(nlohmann::json j)
         d.width = jd["width"];
         d.height = jd["height"];
 
-        // ASSUMPTION: frame IDs are sorted, in order, and frame-ids increment as the timestamp increments, all in
-        // ascending order
-        // TODO add error checking for out of order frames
+        // ASSUMPTION: timestamps are ascending 
         f.detections.push_back(d);
     }
 
