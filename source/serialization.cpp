@@ -1,9 +1,10 @@
-#include "serialization.h"
-#include "types.h"
+#include <stdint.h>
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <vector>
+#include "types.h"
+#include "serialization.h"
 
 std::vector<Frame_Detection> json_to_detections(nlohmann::json j)
 {

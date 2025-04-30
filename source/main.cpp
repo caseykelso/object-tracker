@@ -1,9 +1,9 @@
 #include "docopt/docopt.h"
-#include "serialization.h"
-#include "types.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <tracker.h>
+#include "types.h"
+#include "serialization.h"
 
 static const char USAGE[] =
     R"(RedBarnRobotics
