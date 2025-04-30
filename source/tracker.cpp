@@ -28,7 +28,7 @@ double distance(const cv::Point2d& p1, const cv::Point2d& p2)
     return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
 }
 
-std::map<int, Object2D> update(const std::vector<std::tuple<cv::Point2d, double, double>>& detections)
+std::map<int, Object2D> update(const std::vector<Object2D>& detections)
 {
     // If we have no detections, increment disappearance counters
     if (detections.empty()) 
@@ -53,10 +53,7 @@ std::map<int, Object2D> update(const std::vector<std::tuple<cv::Point2d, double,
     {
         for (const auto& detection : detections) 
         {
-            cv::Point2d centroid;
-            double width, height;
-            std::tie(centroid, width, height) = detection;
-            register_object(centroid, width, height);
+            register_object(detection.centroid, detection.width, detection.height);
         }
         return objects;
     }
@@ -78,14 +75,9 @@ std::map<int, Object2D> update(const std::vector<std::tuple<cv::Point2d, double,
     
     for (const auto& detection : detections) 
     {
-        cv::Point2d centroid;
-        double width;
-        double height;
-        std::tie(centroid, width, height) = detection;
-        
-        input_centroids.push_back(centroid);
-        input_widths.push_back(width);
-        input_heights.push_back(height);
+        input_centroids.push_back(detection.centroid);
+        input_widths.push_back(detection.width);
+        input_heights.push_back(detection.height);
     }
 
     // Compute the cost matrix for the Hungarian algorithm

@@ -14,7 +14,7 @@ namespace {
 
     TEST(TrackerTests, SINGLE_OBJECT)
     {
-        std::vector<std::tuple<cv::Point2d, double, double>> detections;
+        std::vector<Object2D> detections;
         std::map<int, Object2D> tracks;
 
         cv::Point2d centroid;
@@ -36,7 +36,7 @@ namespace {
         json j_object = json::parse(j);
         centroid.x = j_object["detections"][0]["x"].get<float>(); //ASSUMPTION - the position is the center of the 2D object, coordinate space isn't defined from a corner
         centroid.y = j_object["detections"][0]["y"].get<float>();
-        std::tuple<cv::Point2d, double, double> detection(centroid, j_object["detections"][0]["width"].get<double>(), j_object["detections"][0]["height"].get<double>());
+        Object2D detection = {centroid, j_object["detections"][0]["width"].get<double>(), j_object["detections"][0]["height"].get<double>()};
 
         detections.push_back(detection);
         tracks = update(detections);

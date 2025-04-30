@@ -9,4 +9,4 @@ struct Object2D
 };
 
 
-std::map<int, Object2D> update(const std::vector<std::tuple<cv::Point2d, double, double>>& detections);
+std::map<int, Object2D> update(const std::vector<Object2D>& detections);
