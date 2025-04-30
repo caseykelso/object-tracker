@@ -9,8 +9,10 @@ $(info building with $(J) threads)
 
 BASE.DIR=$(PWD)
 DATA.DIR=$(BASE.DIR)/data
-BUILD.DIR=$(BASE.DIR)/build
+BUILD.APP.DIR=$(BASE.DIR)/build
+BUILD.TESTS.DIR=$(BASE.DIR)/build.tests
 SOURCE.DIR=$(BASE.DIR)/source
+TESTS.DIR=$(BASE.DIR)/tests
 DOWNLOADS.DIR=$(BASE.DIR)/downloads
 SCRIPTS.DIR=$(BASE.DIR)/scripts
 ifndef INSTALLED_HOST_DIR
@@ -26,11 +28,16 @@ init: .FORCE
 	mkdir -p $(INSTALLED.HOST.DIR)
 
 build: .FORCE
-	mkdir -p $(BUILD.DIR)
-	cd $(BUILD.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(SOURCE.DIR) && make -j$(J) install
+	mkdir -p $(BUILD.APP.DIR)
+	cd $(BUILD.APP.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(SOURCE.DIR) && make -j$(J) install
 
 run: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
+
+tests: .FORCE
+	mkdir -p $(BUILD.TESTS.DIR)
+	cd $(BUILD.TESTS.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(TESTS.DIR) && make -j$(J) install
+	$(INSTALLED.HOST.DIR)/bin/tracker_rbr_tests
 
 version: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --version
@@ -39,7 +46,7 @@ help: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --help
 
 clean: .FORCE
-	rm -rf $(DOWNLOADS.DIR) && rm -rf $(INSTALLED.HOST.DIR) && rm -rf $(BUILD.DIR) && rm -f $(BASE.DIR)/tags
+	rm -rf $(DOWNLOADS.DIR) && rm -rf $(INSTALLED.HOST.DIR) && rm -rf $(BUILD.APP.DIR) && rm -f $(BASE.DIR)/tags && rm -rf $(BUILD.TESTS.DIR)
 
 ctags: .FORCE
 	cd $(BASE.DIR) && ctags -R --exclude=.git --exclude=downloads --exclude=installed.host --exclude=installed.target --exclude=documents  --exclude=build.*  .
