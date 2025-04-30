@@ -1,8 +1,8 @@
 # Overview
 
-# Setup Ubuntu 24.04 Build Environment
+# Setup Ubuntu 25.04 Build Environment (without Docker)
 ```bash
-sudo apt update -y && sudo apt install libopencv-dev nlohmann-json3-dev cmake git build-essential libgtest-dev exuberant-ctags libdocopt-dev libcaca-dev clang-format -y
+sudo apt update -y && sudo apt install libopencv-dev nlohmann-json3-dev cmake git build-essential libgtest-dev exuberant-ctags libdocopt-dev libcaca-dev clang-format libboost-all-dev -y
 ```
 # Initial Build
 ```bash

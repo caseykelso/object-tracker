@@ -1,0 +1,10 @@
+--- CMakeLists.txt	2015-09-26 15:52:42.000000000 +0000
++++ CMakeLists.txt.patched	2025-04-30 19:29:57.525622198 +0000
+@@ -44,4 +44,7 @@
+ 
+ #install all selected adapters
+ install (FILES ${MunkresAdapters_HEADERS}  DESTINATION include/munkres/adapters PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
++if(BOOST_MATRIX_ADAPTERS)
++install (FILES ${PROJECT_SOURCE_DIR}/src/adapters/boostmatrixadapter.h  DESTINATION include/munkres/adapters PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
++endif(BOOST_MATRIX_ADAPTERS)
+ 

@@ -15,6 +15,12 @@ SOURCE.DIR=$(BASE.DIR)/source
 TESTS.DIR=$(BASE.DIR)/tests
 DOWNLOADS.DIR=$(BASE.DIR)/downloads
 SCRIPTS.DIR=$(BASE.DIR)/scripts
+MUNKRES.VERSION=1.0.0
+MUNKRES.ARCHIVE=v$(MUNKRES.VERSION).tar.gz
+MUNKRES.URL=https://github.com/saebyn/munkres-cpp/archive/refs/tags/$(MUNKRES.ARCHIVE)
+MUNKRES.URL=https://github.com/saebyn/munkres-cpp/archive/refs/tags/$(MUNKRES.ARCHIVE)
+MUNKRES.BUILD=$(DOWNLOADS.DIR)/build.munkres
+MUNKRES.DIR=$(DOWNLOADS.DIR)/munkres-cpp-$(MUNKRES.VERSION)
 ifndef INSTALLED_HOST_DIR
 INSTALLED.HOST.DIR=$(BASE.DIR)/installed.host
 else
@@ -30,9 +36,20 @@ build: .FORCE
 init: .FORCE
 	mkdir -p $(DOWNLOADS.DIR)
 	mkdir -p $(INSTALLED.HOST.DIR)
+	$(MAKE) munkres
+
+munkres: .FORCE
+	rm -rf $(MUNKRES.BUILD) && mkdir -p $(MUNKRES.BUILD)
+	cd $(DOWNLOADS.DIR) && rm -f $(MUNKRES.ARCHIVE) && wget $(MUNKRES.URL) && tar xvf $(MUNKRES.ARCHIVE)
+	patch -p0 < munkres.patch $(MUNKRES.DIR)/CMakeLists.txt
+	patch -p0 < munkres_adapters.patch $(MUNKRES.DIR)/src/adapters/CMakeLists.txt
+	cd $(MUNKRES.BUILD) && cmake -DBOOST_MATRIX_ADAPTER=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(MUNKRES.DIR) && make -j$(J) install
+	cp $(MUNKRES.DIR)/src/adapters/boostmatrixadapter.h $(INSTALLED.HOST.DIR)/include/munkres/adapters # TODO: patch the CMakeLists.txt further and avoid this janky copy
+	cp $(MUNKRES.DIR)/src/adapters/boostmatrixadapter.h $(INSTALLED.HOST.DIR)/include/munkres/adapters
+
 
 run: .FORCE
-	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
+	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
 
 viz: build
 	$(INSTALLED.HOST.DIR)/bin/viz
@@ -40,7 +57,7 @@ viz: build
 tests: .FORCE
 	mkdir -p $(BUILD.TESTS.DIR)
 	cd $(BUILD.TESTS.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(TESTS.DIR) && make -j$(J) install
-	$(INSTALLED.HOST.DIR)/bin/tracker_rbr_tests
+	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(INSTALLED.HOST.DIR)/bin/tracker_rbr_tests
 
 version: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --version
