@@ -13,7 +13,7 @@ namespace {
 
         std::string j = R"({
                          "frame_id": 123,
-                         "timestamp": "2025-03-24T18:00:00Z",
+                         "timestamp": "2025-03-24T18:33:22Z",
                          "detections": [
                          {
                              "x": 0.65,
@@ -26,24 +26,27 @@ namespace {
 
         json j_object = json::parse(j);          
         EXPECT_EQ(123, j_object["frame_id"]);
-
-        
         std::chrono::system_clock::time_point timestamp;
 
-        //TODO: there must be a way to directly construct std::chrono::system_clock::time_point directly from a YYY-MM-DDTHH:MM:SSZ" string
-        EXPECT_EQ("2025-03-24T18:00:00Z", j_object["timestamp"]);
+        EXPECT_EQ("2025-03-24T18:33:22Z", j_object["timestamp"]);
         std::string s(j_object["timestamp"]);
         std::istringstream ss(s);
 
-        std::chrono::from_stream(ss, timestamp);
+        if (std::chrono::from_stream (ss, "%Y-%m-%dT%H:%M:%SZ", timestamp)) 
+        {
+  	    std::chrono::zoned_time zoned (std::chrono::current_zone (), timestamp);
+	    //std::cout << std::format ("{:%d/%b/%Y %H:%M:%S}", zoned);
+        }
+        else
+        {
+            std::cerr << "failed to parse time" << std::endl;
+        }
 
-        auto date = std::chrono::year_month_day{std::chrono::floor<std::chrono::days>(timestamp)};
-        std::cout << date.day() << std::endl;
-        //EXPECT_EQ(static_cast<unsigned int>(date.year()), 2025);
-        EXPECT_EQ(static_cast<unsigned int>(date.day()), 25);
+        auto time_of_day = std::chrono::hh_mm_ss{std::chrono::duration_cast<std::chrono::milliseconds>(timestamp - std::chrono::floor<std::chrono::days>(timestamp))};
 
-//        auto hours = std::chrono::duration_cast<std::chrono::hours>(timestamp);
-
+        EXPECT_EQ(18, time_of_day.hours().count());
+        EXPECT_EQ(33, time_of_day.minutes().count());
+        EXPECT_EQ(22, time_of_day.seconds().count());
         EXPECT_EQ(0.65, j_object["detections"][0]["x"]);
         EXPECT_EQ(0.42, j_object["detections"][0]["y"]);
         EXPECT_EQ(0.05, j_object["detections"][0]["width"]);
