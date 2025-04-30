@@ -23,13 +23,13 @@ endif
 
 ci: init build
 
-init: .FORCE
-	mkdir -p $(DOWNLOADS.DIR)
-	mkdir -p $(INSTALLED.HOST.DIR)
-
 build: .FORCE
 	mkdir -p $(BUILD.APP.DIR)
 	cd $(BUILD.APP.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(SOURCE.DIR) && make -j$(J) install
+
+init: .FORCE
+	mkdir -p $(DOWNLOADS.DIR)
+	mkdir -p $(INSTALLED.HOST.DIR)
 
 run: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json

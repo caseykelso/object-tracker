@@ -1,4 +1,7 @@
 cmake_minimum_required (VERSION 3.20)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)  # Use -std=c++20 instead of -std=gnu++20
 project(tracker-rbr)
 add_executable(tracker_rbr main.cpp)
 add_library(tracker tracker.cpp)
@@ -6,7 +9,6 @@ set_target_properties(tracker PROPERTIES PUBLIC_HEADER tracker.h types.h seriali
 include_directories(BEFORE ${CMAKE_PREFIX_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_directories(tracker BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
 target_link_libraries(tracker_rbr docopt pthread rt)
-set_property(TARGET tracker PROPERTY CXX_STANDARD 17)
 install(TARGETS tracker PUBLIC_HEADER DESTINATION include)
 install(TARGETS tracker DESTINATION lib)
 install(TARGETS tracker_rbr DESTINATION bin)
