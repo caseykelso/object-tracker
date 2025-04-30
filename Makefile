@@ -8,6 +8,7 @@ endif
 $(info building with $(J) threads)
 
 BASE.DIR=$(PWD)
+DATA.DIR=$(BASE.DIR)/data
 BUILD.DIR=$(BASE.DIR)/build
 SOURCE.DIR=$(BASE.DIR)/source
 DOWNLOADS.DIR=$(BASE.DIR)/downloads
@@ -29,7 +30,7 @@ build: .FORCE
 	cd $(BUILD.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(SOURCE.DIR) && make -j$(J) install
 
 run: .FORCE
-	$(INSTALLED.HOST.DIR)/bin/tracker-rbr
+	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
 
 clean: .FORCE
 	rm -rf $(DOWNLOADS.DIR) && rm -rf $(INSTALLED.HOST.DIR) && rm -rf $(BUILD.DIR) && rm -f $(BASE.DIR)/tags

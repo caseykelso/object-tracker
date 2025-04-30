@@ -2,7 +2,7 @@
 
 # Setup Ubuntu 24.04 Build Environment
 ```bash
-sudo apt update -y && sudo apt install libopencv-dev nlohmann-json3-dev cmake git build-essential googletest exuberant-ctags -y
+sudo apt update -y && sudo apt install libopencv-dev nlohmann-json3-dev cmake git build-essential googletest exuberant-ctags libdocopt-dev -y
 ```
 # Initial Build
 ```bash
