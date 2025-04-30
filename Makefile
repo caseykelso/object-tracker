@@ -52,7 +52,7 @@ ctags: .FORCE
 	cd $(BASE.DIR) && ctags -R --exclude=.git --exclude=downloads --exclude=installed.host --exclude=installed.target --exclude=documents  --exclude=build.*  .
 
 clangformat: .FORCE
-	clang-format -i source/*. source/*.cpp --style=Microsoft
+	clang-format -i source/*.h source/*.cpp --style=Microsoft
 .FORCE:
 
 
