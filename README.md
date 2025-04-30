@@ -38,3 +38,11 @@ make deploy
 make ctags
 ```
 
+# Docker
+
+## Build & Start & Run
+```bash
+docker-compose build
+docker-compose up -d
+docker-compose exec ubuntu bash
+```
