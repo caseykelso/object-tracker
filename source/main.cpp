@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 {
     std::map<std::string, docopt::value> args;
     
-    args = docopt::docopt(USAGE, { argv + 1, argv + argc }, true, "Red Barn Robotics Cabbage Tracker");
+    args = docopt::docopt(USAGE, { argv + 1, argv + argc }, true, "Red Barn Robotics Cabbage Tracker 0.1");
     
     std::string frames_path = args["--input"].asString();
     std::string tracks_path = args["--output"].asString();

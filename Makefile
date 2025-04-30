@@ -32,6 +32,12 @@ build: .FORCE
 run: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
 
+version: .FORCE
+	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --version
+
+help: .FORCE
+	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --help
+
 clean: .FORCE
 	rm -rf $(DOWNLOADS.DIR) && rm -rf $(INSTALLED.HOST.DIR) && rm -rf $(BUILD.DIR) && rm -f $(BASE.DIR)/tags
 
