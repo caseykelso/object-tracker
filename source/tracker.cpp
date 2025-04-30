@@ -9,7 +9,7 @@
 
 std::map<int, Object2D> objects;
 uint32_t next_object_id;
-const double max_distance = 0.3;
+const double max_distance = 0.001;
 const double max_disappeared = 20;
 
 void tracker_clear() //TODO: this is janky, create a class to with constructors/destructors and properly manage memory lifecycle
@@ -105,15 +105,9 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
     std::vector<int> assignment;
     cv::Mat_<double> cost_matrix_clone = cost_matrix.clone();
     assignment.resize(cost_matrix.rows);
-    
-    // Initialize assignment vector to -1 (unassigned)
-    for (size_t i = 0; i < assignment.size(); i++) 
-    {
-        assignment[i] = -1;
-    }
- 
-     Munkres m;  
-     m.solve(cost_matrix); 
+   
+    Munkres m;  
+    m.solve(cost_matrix); 
 
     // Process assignments
     std::vector<bool> used_rows(object_centroids.size(), false);
