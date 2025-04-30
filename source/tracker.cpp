@@ -9,7 +9,7 @@
 
 std::map<int, Object2D> objects;
 uint32_t next_object_id;
-double max_distance;
+const double max_distance = 0.3;
 const double max_disappeared = 20;
 
 void tracker_clear() //TODO: this is janky, create a class to with constructors/destructors and properly manage memory lifecycle
@@ -40,6 +40,7 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
     // If we have no detections, increment disappearance counters
     if (detections.empty()) 
     {
+        std::cout << "**********EMPTY " << std::endl;
         for (auto it = objects.begin(); it != objects.end();) 
         {
             it->second.disappeared++;
@@ -58,6 +59,7 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
     // If we're not tracking any objects, register all detections
     if (objects.empty()) 
     {
+        std::cout << "*********REGISTER ALL" << std::endl;
         for (const auto& detection : detections) 
         {
             register_object(detection.centroid, detection.width, detection.height);
@@ -121,11 +123,17 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
     {
         if (assignment[i] >= 0) 
         {
+            std::cout << "----------------------" << std::endl;
             // If the cost is greater than the maximum distance, don't consider it a match
             if (cost_matrix.at<double>(i, assignment[i]) > max_distance) 
             {
                 assignment[i] = -1;
+                std::cout <<"******MISMATCH: " << cost_matrix.at<double>(i, assignment[i]) << std::endl;
                 continue;
+            }
+            else
+            {
+                std::cout <<"******MATCH" << std::endl;
             }
             
             used_rows[i] = true;
@@ -137,6 +145,10 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
             objects[object_id].width       = input_widths[assignment[i]];
             objects[object_id].height      = input_heights[assignment[i]];
             objects[object_id].disappeared = 0;
+        }
+        else
+        {
+            std::cout << "++++++++++++++++++++++++++" << std::endl;
         }
     }
 
