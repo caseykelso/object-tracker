@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     nlohmann-json3-dev \
     cmake \
     libdocopt-dev \
+    libcaca-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
