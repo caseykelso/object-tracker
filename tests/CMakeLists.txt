@@ -8,7 +8,7 @@ find_package(OpenCV REQUIRED)
 
 add_executable(tracker_rbr_tests tests.cpp)
 include_directories(BEFORE ${OpenCV_INCLUDE_DIR} ${CMAKE_PREFIX_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(tracker_rbr_tests tracker ${OpenCV_LIBS} gtest pthread rt)
+target_link_libraries(tracker_rbr_tests tracker munkres ${OpenCV_LIBS} gtest pthread rt)
 target_link_directories(tracker_rbr_tests BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
 install(TARGETS tracker_rbr_tests DESTINATION bin)
 

@@ -1,27 +1,19 @@
 #include <chrono>
 #include <stdint.h>
 #include <vector>
-#include "tracker.h"
-#include "types.h"
 #include <opencv2/opencv.hpp>
 #include "munkres.h"
-
-struct Object3D
-{
-    cv::Point3d centroid;
-    double width;
-    double height;
-    uint32_t disappeared;
-};
+#include "types.h"
+#include "tracker.h"
 
 uint32_t next_object_id;
-std::map<int, Object3D> objects;
+std::map<int, Object2D> objects;
 double max_distance;
 const double max_disappeared = 20;
 
-void register_object(const cv::Point3d& centroid, double width, double height)
+void register_object(const cv::Point2d& centroid, double width, double height)
 {
-    Object3D object = {centroid, width, height, 0};
+    Object2D object = {centroid, width, height, 0};
     objects[next_object_id] = object;
     ++next_object_id;
 }
@@ -31,12 +23,12 @@ void deregister_object(uint32_t object_id)
     objects.erase(object_id);
 }
 
-double distance(const cv::Point3d& p1, const cv::Point3d& p2)
+double distance(const cv::Point2d& p1, const cv::Point2d& p2)
 {
     return std::sqrt(std::pow(p1.x - p2.x, 2) + std::pow(p1.y - p2.y, 2));
 }
 
-std::map<int, Object3D> update(const std::vector<std::tuple<cv::Point3d, double, double>>& detections)
+std::map<int, Object2D> update(const std::vector<std::tuple<cv::Point2d, double, double>>& detections)
 {
     // If we have no detections, increment disappearance counters
     if (detections.empty()) 
@@ -61,7 +53,7 @@ std::map<int, Object3D> update(const std::vector<std::tuple<cv::Point3d, double,
     {
         for (const auto& detection : detections) 
         {
-            cv::Point3d centroid;
+            cv::Point2d centroid;
             double width, height;
             std::tie(centroid, width, height) = detection;
             register_object(centroid, width, height);
@@ -71,7 +63,7 @@ std::map<int, Object3D> update(const std::vector<std::tuple<cv::Point3d, double,
 
     // Extract existing object centroids and IDs
     std::vector<int> object_ids;
-    std::vector<cv::Point3d> object_centroids;
+    std::vector<cv::Point2d> object_centroids;
     
     for (const auto& pair : objects) 
     {
@@ -80,13 +72,13 @@ std::map<int, Object3D> update(const std::vector<std::tuple<cv::Point3d, double,
     }
 
     // Extract input centroids from detections
-    std::vector<cv::Point3d> input_centroids;
+    std::vector<cv::Point2d> input_centroids;
     std::vector<double> input_widths;
     std::vector<double> input_heights;
     
     for (const auto& detection : detections) 
     {
-        cv::Point3d centroid;
+        cv::Point2d centroid;
         double width;
         double height;
         std::tie(centroid, width, height) = detection;

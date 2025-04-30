@@ -3,12 +3,63 @@
 #include <chrono>
 #include "gtest/gtest.h"
 #include <nlohmann/json.hpp>
+#include <opencv2/opencv.hpp>
 #include "types.h"
 #include "serialization.h"
+#include "tracker.h"
 
 using json = nlohmann::json;
 
 namespace {
+
+    TEST(TrackerTests, SINGLE_OBJECT)
+    {
+        std::vector<std::tuple<cv::Point2d, double, double>> detections;
+        std::map<int, Object2D> tracks;
+
+        cv::Point2d centroid;
+
+        std::string j = R"({
+                         "frame_id": 123,
+                         "timestamp": "2025-03-24T18:33:22Z",
+                         "detections": [
+                         {
+                             "x": 0.65,
+                             "y": 0.42,
+                             "width": 0.05,
+                             "height": 0.10
+                         }
+                        ]
+                       })";
+
+
+        json j_object = json::parse(j);
+        centroid.x = j_object["detections"][0]["x"].get<float>(); //ASSUMPTION - the position is the center of the 2D object, coordinate space isn't defined from a corner
+        centroid.y = j_object["detections"][0]["y"].get<float>();
+        std::tuple<cv::Point2d, double, double> detection(centroid, j_object["detections"][0]["width"].get<double>(), j_object["detections"][0]["height"].get<double>());
+
+        detections.push_back(detection);
+        tracks = update(detections);
+
+
+        int first_object_id      = -1;
+        uint8_t number_of_tracks = 0;
+        Object2D o;
+
+        for (auto& [object_id, object] : tracks)
+        {
+            first_object_id = object_id;
+            o = object;
+            ++number_of_tracks;
+        }
+
+       EXPECT_EQ(0, first_object_id);
+       EXPECT_EQ(1, number_of_tracks); 
+       EXPECT_EQ(0.05, o.width);
+       EXPECT_EQ(0.1, o.height);
+       EXPECT_NEAR(0.65, o.centroid.x, 1e-5);
+       EXPECT_NEAR(0.42, o.centroid.y, 1e-5);
+    }
 
     TEST(TrackerTests, DESERIALIZE_JSON)
     {
