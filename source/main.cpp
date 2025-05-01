@@ -1,9 +1,9 @@
 #include "docopt/docopt.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include <opencv2/opencv.hpp>
 #include "types.h"
 #include "serialization.h"
+#include <queue>
 #include <tracker.h>
 
 static const char USAGE[] =

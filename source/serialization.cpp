@@ -6,7 +6,6 @@
 #include <opencv2/opencv.hpp>
 #include "types.h"
 #include "serialization.h"
-
 void print_track(const Track &t)
 {
     std::cout << "-----------------------" << std::endl;
@@ -29,8 +28,8 @@ Track object2d_to_track(const Object2D &o, uint32_t id)
 {
    Track result;
    result.id     = id;
-   result.x      = o.centroid.x;
-   result.y      = o.centroid.y;
+   result.x      = o.x;
+   result.y      = o.y;
    result.width  = o.width;
    result.height = o.height;
 
@@ -98,7 +97,7 @@ std::vector<Object2D> detections_to_object2d(Frame_Detection frame)
     std::vector<Object2D> objects;
     for (const auto& detection : frame.detections)
     {
-        Object2D o = {cv::Point2d(detection.x, detection.y), detection.width, detection.height, 0};
+        Object2D o = {detection.x, detection.y, detection.width, detection.height, 0};
         objects.push_back(o);
     }
     return objects;

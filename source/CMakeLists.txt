@@ -16,11 +16,11 @@ add_library(tracker SHARED tracker.cpp serialization.cpp)
 set_target_properties(tracker PROPERTIES PUBLIC_HEADER tracker.h)
 set_target_properties(tracker PROPERTIES PUBLIC_HEADER types.h)
 
-include_directories(BEFORE ${OpenCV_INCLUDE_DIRS} ${CMAKE_PREFIX_PATH}/include/munkres ${CMAKE_PREFIX_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(BEFORE ${OpenCV_INCLUDE_DIRS} ${CMAKE_PREFIX_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_directories(tracker BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
 target_link_directories(tracker_rbr BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
-target_link_libraries(tracker_rbr docopt munkres ${OpenCV_LIBS} pthread rt)
+target_link_libraries(tracker_rbr docopt ${OpenCV_LIBS} pthread rt)
 target_link_libraries(viz caca pthread rt)
 
 install(FILES types.h tracker.h serialization.h DESTINATION include)

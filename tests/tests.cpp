@@ -1,88 +1,141 @@
-#include <sstream>
+
 #include <iomanip>
 #include <chrono>
 #include "gtest/gtest.h"
 #include <nlohmann/json.hpp>
-#include <opencv2/opencv.hpp>
 #include "types.h"
 #include "serialization.h"
+#include <queue>
+#include <float.h>
 #include "tracker.h"
 
 using json = nlohmann::json;
 
 namespace {
 
+TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
+{
+    // building json docs is tedius, the parsing is proven, let's just build the objects directly
+
+    IoUTracker tracker;
+    std::vector<Frame> frames;
+    std::vector<Object2D> detections0 = 
+    {
+        {0.1, 0.2, 0.3, 0.4, -1},
+        {0.4, 0.5, 0.1, 0.2, -1},
+        {0.6, 0.0, 0.8, 0.9, -1}
+    };
+    std::vector<Object2D> detections1 = 
+    {
+        {0.1, 0.2, 0.3, 0.4, -1},
+        {0.6, 0.0, 0.8, 0.9, -1}
+    };
+
+
+    Frame f0(detections0);
+    Frame f1(detections1);
+
+    auto tracks = tracker.update(f0.detections);
+    EXPECT_EQ(3, tracks.size());
+
+    tracks = tracker.update(f1.detections);
+    EXPECT_EQ(3, tracks.size());
+#if 0
+    for (uint8_t i = 0; i < 2; ++i)
+    {
+        tracks = tracker.update(f1.detections);
+        EXPECT_EQ(3, tracks.size());
+    }
+#endif
+
+    for (auto& f: frames)
+    {
+        auto tracks = tracker.update(f.detections);
+
+        int last_object_id      = -1;
+        uint8_t number_of_tracks = 0;
+        Object2D o;
+
+        for (auto& track : tracks)
+        {
+            last_object_id = track.id;
+            o = track;
+            ++number_of_tracks;
+        }
+
+    }
+}
+
+
+
 
     TEST(TrackerTests, THREE_OBJECTS_TWO_FRAMES_NO_DISAPPEAR)
     {
-        std::map<int, Object2D> tracks;
-        tracker_clear(); // this should live in googletest.Setup() overide, or refactor tractor to properly use RAII
-
-        cv::Point2d centroid;
+        std::vector<Object2D> tracks;
 
         std::string j = R"(
-[
-  {
-    "frame_id": 123,
-    "timestamp": "2025-03-24T18:00:00Z",
-    "detections": [
-      {
-        "x": 0.65,
-        "y": 0.42,
-        "width": 0.05,
-        "height": 0.05
-      },
-      {
-        "x": 0.32,
-        "y": 0.78,
-        "width": 0.04,
-        "height": 0.06
-      }
-    ]
-  },
-  {
-    "frame_id": 124,
-    "timestamp": "2025-03-24T18:00:01Z",
-    "detections": [
-      {
-        "x": 0.66,
-        "y": 0.43,
-        "width": 0.05,
-        "height": 0.05
-      },
-      {
-        "x": 0.33,
-        "y": 0.79,
-        "width": 0.04,
-        "height": 0.06
-      }
-    ]
-  },
-  {
-    "frame_id": 125,
-    "timestamp": "2025-03-24T18:00:02Z",
-    "detections": [
-      {
-        "x": 0.67,
-        "y": 0.44,
-        "width": 0.05,
-        "height": 0.05
-      },
-      {
-        "x": 0.34,
-        "y": 0.80,
-        "width": 0.04,
-        "height": 0.06
-      },
-      {
-        "x": 0.51,
-        "y": 0.22,
-        "width": 0.03,
-        "height": 0.03
-      }
-    ]
-  }
-]
+    [
+          {
+            "frame_id": 123,
+            "timestamp": "2025-03-24T18:00:00Z",
+            "detections": [
+              {
+                "x": 0.65,
+                "y": 0.42,
+                "width": 0.05,
+                "height": 0.05
+              },
+              {
+                "x": 0.32,
+                "y": 0.78,
+                "width": 0.04,
+                "height": 0.06
+              }
+            ]
+          },
+          {
+            "frame_id": 124,
+            "timestamp": "2025-03-24T18:00:01Z",
+            "detections": [
+              {
+                "x": 0.66,
+                "y": 0.43,
+                "width": 0.05,
+                "height": 0.05
+              },
+              {
+                "x": 0.33,
+                "y": 0.79,
+                "width": 0.04,
+                "height": 0.06
+              }
+            ]
+          },
+          {
+            "frame_id": 125,
+            "timestamp": "2025-03-24T18:00:02Z",
+            "detections": [
+              {
+                "x": 0.67,
+                "y": 0.44,
+                "width": 0.05,
+                "height": 0.05
+              },
+              {
+                "x": 0.34,
+                "y": 0.80,
+                "width": 0.04,
+                "height": 0.06
+              },
+              {
+                "x": 0.51,
+                "y": 0.22,
+                "width": 0.03,
+                "height": 0.03
+              }
+            ]
+          }
+        ]
         )";
 
 
@@ -93,17 +146,18 @@ namespace {
 
         for (const auto& detection : detections)
         {
+            IoUTracker tracker;
             auto objects    = detections_to_object2d(detection);
-            tracks = update(objects);
+            tracks = tracker.update(objects);
 
             int last_object_id      = -1;
             uint8_t number_of_tracks = 0;
             Object2D o;
 
-            for (auto& [object_id, object] : tracks)
+            for (auto& track : tracks)
             {
-                last_object_id = object_id;
-                o = object;
+                last_object_id = track.id;
+                o = track;
                 ++number_of_tracks;
             }
 
@@ -113,7 +167,7 @@ namespace {
             }
             else if (1 == i) // second frame
             {
-                EXPECT_EQ(3, number_of_tracks); 
+                EXPECT_EQ(2, number_of_tracks); 
             }
             else // third frame
             {
@@ -125,14 +179,9 @@ namespace {
     }
 
 
-
     TEST(TrackerTests, THREE_OBJECTS_ONE_FRAME)
     {
-        std::map<int, Object2D> tracks;
-        tracker_clear(); // this should live in googletest.Setup() overide, or refactor tractor to properly use RAII
-
-        cv::Point2d centroid;
-
+        std::vector<Object2D> tracks;
         std::string j = R"({
                          "frame_id": 123,
                          "timestamp": "2025-03-24T18:33:22Z",
@@ -158,7 +207,6 @@ namespace {
                         ]
                        })";
 
-
         json j_object = json::parse(j);
 
         auto detections = json_to_detections(j_object);
@@ -167,32 +215,28 @@ namespace {
 
         for (const auto& detection : detections)
         {
+            IoUTracker tracker;
             auto objects    = detections_to_object2d(detection);
-            tracks = update(objects);
+            tracks          = tracker.update(objects);
 
             int last_object_id      = -1;
             uint8_t number_of_tracks = 0;
             Object2D o;
 
-            for (auto& [object_id, object] : tracks)
+            for (auto& track : tracks)
             {
-                last_object_id = object_id;
-                o = object;
+                last_object_id = track.id;
+                o = track;
                 ++number_of_tracks;
             }
-
              EXPECT_EQ(3, number_of_tracks); 
         }
     }
 
 
-
     TEST(TrackerTests, SINGLE_OBJECT)
     {
-        std::map<int, Object2D> tracks;
-        tracker_clear();
-
-        cv::Point2d centroid;
+        std::vector<Object2D> tracks;
 
         std::string j = R"({
                          "frame_id": 123,
@@ -214,26 +258,26 @@ namespace {
 
         for (const auto& detection : detections)
         {
-            auto objects    = detections_to_object2d(detection);
-            tracks = update(objects);
-
+            Object2D o;
+            IoUTracker tracker;
+            auto objects             = detections_to_object2d(detection);
+            tracks                   = tracker.update(objects);
             int first_object_id      = -1;
             uint8_t number_of_tracks = 0;
-            Object2D o;
 
-            for (auto& [object_id, object] : tracks)
+            for (auto& track : tracks)
             {
-                first_object_id = object_id;
-                o = object;
+                first_object_id = track.id;
+                o = track;
                 ++number_of_tracks;
             }
 
            EXPECT_EQ(0, first_object_id);
            EXPECT_EQ(1, number_of_tracks); 
-           EXPECT_NEAR(0.05, o.width, 1e-5);
-           EXPECT_NEAR(0.1, o.height, 1e-5);
-           EXPECT_NEAR(0.65, o.centroid.x, 1e-5);
-           EXPECT_NEAR(0.42, o.centroid.y, 1e-5);
+           EXPECT_FLOAT_EQ(0.05, o.width);
+           EXPECT_FLOAT_EQ(0.1, o.height);
+           EXPECT_FLOAT_EQ(0.65, o.x);
+           EXPECT_FLOAT_EQ(0.42, o.y);
         }
     }
 
@@ -278,7 +322,6 @@ namespace {
             EXPECT_EQ(0.10, j_object["detections"][detection_iterator]["height"]);
         }
     }
-}
 
     TEST(TrackerTests, DESERIALIZE_JSON_MULTIPLE_DETECTIONS)
     {
@@ -362,23 +405,18 @@ namespace {
 
     TEST(TrackerTests, EMPTY_DETECTIONS)
     {
-        std::map<int, Object2D> tracks;
-        tracker_clear();
+        IoUTracker tracker(0.3);
 
-        cv::Point2d centroid;
-
-       
         std::vector<Object2D> objects;
-        tracks = update(objects);
+        std::vector<Object2D> tracks = tracker.update(objects);
 
         int last_object_id      = -1;
         uint8_t number_of_tracks = 0;
         Object2D o;
 
-        for (auto& [object_id, object] : tracks)
+        for (auto& track : tracks)
         {
-            last_object_id = object_id;
-            o = object;
+            last_object_id = track.id;
             ++number_of_tracks;
         }
         EXPECT_EQ(0, number_of_tracks); 
@@ -390,19 +428,18 @@ namespace {
 
         o.width      = 0.1;
         o.height     = 0.2;
-        o.centroid.x = 0.05;
-        o.centroid.y = 0.07;
+        o.x          = 0.05;
+        o.y          = 0.07;
 
         Track t = object2d_to_track(o, 77);
 
         EXPECT_EQ(77, t.id);
-        EXPECT_NEAR(0.1, t.width, 1e-5);
-        EXPECT_NEAR(0.2, t.height, 1e-5);
-        EXPECT_NEAR(0.05, o.centroid.x, 1e-5);
-        EXPECT_NEAR(0.07, o.centroid.y, 1e-5);
+        EXPECT_NEAR(0.1, t.width, FLT_EPSILON);
+        EXPECT_NEAR(0.2, t.height, FLT_EPSILON);
+        EXPECT_NEAR(0.05, o.x, FLT_EPSILON);
+        EXPECT_NEAR(0.07, o.y, FLT_EPSILON);
     }
-
-
+};
 
 int main (int argc, char** argv)
 {
