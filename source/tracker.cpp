@@ -9,7 +9,7 @@
 
 std::map<int, Object2D> objects;
 uint32_t next_object_id;
-const double max_distance = 0.001;
+const double max_distance = 0.6;
 const double max_disappeared = 20;
 
 void tracker_clear() //TODO: this is janky, create a class to with constructors/destructors and properly manage memory lifecycle
@@ -103,8 +103,8 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
 
     // Solve the assignment problem using the Hungarian algorithm
     std::vector<int> assignment;
-    cv::Mat_<double> cost_matrix_clone = cost_matrix.clone();
     assignment.resize(cost_matrix.rows);
+    std::cout << "cost_matrix_rows: " << cost_matrix.rows << std::endl;
    
     Munkres m;  
     m.solve(cost_matrix); 
@@ -112,24 +112,16 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
     // Process assignments
     std::vector<bool> used_rows(object_centroids.size(), false);
     std::vector<bool> used_columns(input_centroids.size(), false);
+
     
     for (size_t i = 0; i < assignment.size(); i++) 
     {
-        if (assignment[i] >= 0) 
+        std::cout << "----------------------" << std::endl;
+        // If the cost is greater than the maximum distance, don't consider it a match
+        std::cout << "assignment: " << assignment[i] << std::endl;
+        if (cost_matrix.at<double>(i, assignment[i]) <= DBL_MAX) //max_distance) 
         {
-            std::cout << "----------------------" << std::endl;
-            // If the cost is greater than the maximum distance, don't consider it a match
-            if (cost_matrix.at<double>(i, assignment[i]) > max_distance) 
-            {
-                assignment[i] = -1;
-                std::cout <<"******MISMATCH: " << cost_matrix.at<double>(i, assignment[i]) << std::endl;
-                continue;
-            }
-            else
-            {
-                std::cout <<"******MATCH" << std::endl;
-            }
-            
+            std::cout <<"******MATCH: " << cost_matrix.at<double>(i, assignment[i]) << "," << max_distance << std::endl;
             used_rows[i] = true;
             used_columns[assignment[i]] = true;
             
@@ -139,10 +131,13 @@ std::map<int, Object2D> update(const std::vector<Object2D>& detections)
             objects[object_id].width       = input_widths[assignment[i]];
             objects[object_id].height      = input_heights[assignment[i]];
             objects[object_id].disappeared = 0;
+
         }
         else
         {
-            std::cout << "++++++++++++++++++++++++++" << std::endl;
+            assignment[i] = -1;
+            std::cout <<"******MISMATCH: " << cost_matrix.at<double>(i, assignment[i]) << "," << max_distance << std::endl;
+            used_rows[i] = false;
         }
     }
 

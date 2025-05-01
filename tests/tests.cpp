@@ -360,6 +360,30 @@ namespace {
         }
     }
 
+    TEST(TrackerTests, EMPTY_DETECTIONS)
+    {
+        std::map<int, Object2D> tracks;
+        tracker_clear();
+
+        cv::Point2d centroid;
+
+       
+        std::vector<Object2D> objects;
+        tracks = update(objects);
+
+        int last_object_id      = -1;
+        uint8_t number_of_tracks = 0;
+        Object2D o;
+
+        for (auto& [object_id, object] : tracks)
+        {
+            last_object_id = object_id;
+            o = object;
+            ++number_of_tracks;
+        }
+        EXPECT_EQ(0, number_of_tracks); 
+    }
+
     TEST(TrackerTests, OBJECT2D_TO_TRACK)
     {
         Object2D o;
