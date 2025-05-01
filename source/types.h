@@ -7,9 +7,10 @@ struct Object2D {
     float width;     // Object width
     float height;    // Object height
     int id;          // Unique identifier for tracking
+    uint8_t frames_missing; // the number of frames where the object is missing after first detection
 
     Object2D(float x_val = 0, float y_val = 0, float w = 0, float h = 0, int id_val = -1) 
-        : x(x_val), y(y_val), width(w), height(h), id(id_val) {}
+        : x(x_val), y(y_val), width(w), height(h), id(id_val), frames_missing(0) {}
 };
 
 // Edge in the flow network

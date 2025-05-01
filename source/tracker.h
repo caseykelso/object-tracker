@@ -102,14 +102,16 @@ public:
 };
 
 // IoU-based 2D object tracker
-class IoUTracker {
+class IoUTracker 
+{
 private:
     std::vector<Object2D> previous_objects;
     int next_id;
     double min_iou_threshold;    // Minimum IoU to consider a match
     
     // Calculate IoU (Intersection over Union) between two objects
-    double calculateIoU(const Object2D& obj1, const Object2D& obj2) {
+    double calculateIoU(const Object2D& obj1, const Object2D& obj2) 
+    {
         // Calculate the boundaries of each box
         float left1 = obj1.x - obj1.width / 2.0f;
         float right1 = obj1.x + obj1.width / 2.0f;
@@ -137,15 +139,18 @@ private:
         float union_area = area1 + area2 - intersection_area;
         
         // Return IoU
-        if (union_area > 0) {
+        if (union_area > 0) 
+        {
             return intersection_area / union_area;
         }
         return 0.0;  // No overlap
     }
     
     // Convert IoU to an integer capacity (higher IoU = higher capacity)
-    int iouToCapacity(double iou) {
-        if (iou < min_iou_threshold) {
+    int iouToCapacity(double iou) 
+    {
+        if (iou < min_iou_threshold) 
+        {
             return 0;  // No edge if IoU too small
         }
         
@@ -156,7 +161,7 @@ private:
 
 public:
     // Constructor with IoU threshold parameter
-    IoUTracker(double iou_threshold = 0.3) 
+    IoUTracker(double iou_threshold = 0.3, uint8_t max_missing_frames = 10) 
         : next_id(0), min_iou_threshold(iou_threshold) {}
 
     // Process new detections and match with existing tracks using IoU
@@ -165,11 +170,14 @@ public:
         std::vector<Object2D> current_objects = detections;
         
         // First frame or no previous objects
-        if (previous_objects.empty()) {
+        if (previous_objects.empty()) 
+        {
             // Assign new IDs to all detections
-            for (auto& obj : current_objects) {
+            for (auto& obj : current_objects) 
+            {
                 obj.id = next_id++;
             }
+
             previous_objects = current_objects;
             return current_objects;
         }
@@ -186,22 +194,27 @@ public:
         MaximumBipartiteMatching network(total_vertices, source, sink);
         
         // Connect source to all previous objects with capacity 1
-        for (int i = 1; i <= n_prev; i++) {
+        for (int i = 1; i <= n_prev; i++) 
+        {
             network.addEdge(source, i, 1);
         }
         
         // Connect current objects to sink with capacity 1
-        for (int j = 1; j <= n_curr; j++) {
+        for (int j = 1; j <= n_curr; j++) 
+        {
             network.addEdge(n_prev + j, sink, 1);
         }
         
         // Connect previous objects to current objects with capacity based on IoU
-        for (int i = 0; i < n_prev; i++) {
-            for (int j = 0; j < n_curr; j++) {
+        for (int i = 0; i < n_prev; i++) 
+        {
+            for (int j = 0; j < n_curr; j++) 
+            {
                 double iou = calculateIoU(previous_objects[i], current_objects[j]);
                 int capacity = iouToCapacity(iou);
                 
-                if (capacity > 0) {
+                if (capacity > 0) 
+                {
                     network.addEdge(i + 1, n_prev + j + 1, capacity);
                 }
             }
@@ -217,7 +230,8 @@ public:
         std::vector<bool> assigned_curr(n_curr, false);
         
         // Assign IDs based on matching
-        for (const auto& match : matches) {
+        for (const auto& match : matches) 
+        {
             int prev_idx = match.first;
             int curr_idx = match.second;
             
@@ -226,8 +240,10 @@ public:
         }
         
         // Assign new IDs to unmatched detections
-        for (int i = 0; i < n_curr; i++) {
-            if (!assigned_curr[i]) {
+        for (int i = 0; i < n_curr; i++) 
+        {
+            if (!assigned_curr[i]) 
+            {
                 current_objects[i].id = next_id++;
             }
         }
@@ -239,7 +255,8 @@ public:
     }
     
     // Reset the tracker
-    void reset() {
+    void reset() 
+    {
         previous_objects.clear();
         next_id = 0;
     }
