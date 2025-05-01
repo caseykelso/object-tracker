@@ -340,11 +340,11 @@ public:
     }
     
     // Get only active tracked objects
-    std::vector<Object2D> getActiveTrackedObjects() const {
-        std::vector<Object2D> result;
+    std::vector<Track> getActiveTrackedObjects() const {
+        std::vector<Track> result;
         for (const auto& tracked_obj : tracked_objects) {
             if (tracked_obj.is_active) {
-                result.push_back(tracked_obj.object);
+                result.push_back(object2d_to_track(tracked_obj.object));
             }
         }
         return result;

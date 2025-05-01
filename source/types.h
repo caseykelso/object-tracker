@@ -25,8 +25,9 @@ struct Edge {
 
 struct Frame
 {
+    std::string timestamp;
     std::vector<Object2D> detections;
-    Frame(std::vector<Object2D> d) : detections(d) {}
+    Frame(std::vector<Object2D> d, std::string t) : detections(d), timestamp(t) {}
 };
 
 
@@ -45,7 +46,10 @@ struct Track
     float y;
     float width;
     float height;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_ONLY_SERIALIZE(Track, id, x, y, width, height)
 };
+
 
 struct Frame_Detection
 {
@@ -57,6 +61,11 @@ struct Frame_Detection
 struct Frame_Track
 {
     uint32_t frame_id;
-    std::chrono::system_clock::time_point timestamp;
+    std::string timestamp;
     std::vector<Track> tracks;
+
+    Frame_Track(uint32_t id, std::string t, std::vector<Track> ts) : frame_id(id), timestamp(t), tracks(ts) {}
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_ONLY_SERIALIZE(Frame_Track, frame_id,timestamp, tracks)
 };
+
+

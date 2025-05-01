@@ -314,15 +314,15 @@ int main()
     try
     {
         // Create visualizer with custom world bounds
-        Visualizer3D viz(100, 40, -5.0, 5.0, -3.0, 3.0);
+        Visualizer3D viz(100, 100, -1.0, 1.0, -1.0, 1.0);
 
         // Start visualization thread
         viz.start();
 
         // Add some example objects
-        viz.addObject(Object3D(-2.0, 1.0, 0.0, 1.0, 0.5, 1));
+        viz.addObject(Object3D(-1.0, 1.0, 0.0, 1.0, 0.5, 1));
         viz.addObject(Object3D(0.0, 0.0, 0.0, 0.8, 0.8, 2));
-        viz.addObject(Object3D(3.0, -1.5, 0.0, 1.2, 1.0, 3));
+        viz.addObject(Object3D(1.0, -0.5, 0.0, 0.2, 1.0, 3));
 
         // Main loop
         int frame = 0;

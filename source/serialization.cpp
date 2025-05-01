@@ -24,10 +24,10 @@ void print_tracks(const std::vector<Track> &tracks)
     }
 }
 
-Track object2d_to_track(const Object2D &o, uint32_t id)
+Track object2d_to_track(const Object2D &o)
 {
    Track result;
-   result.id     = id;
+   result.id     = o.id;
    result.x      = o.x;
    result.y      = o.y;
    result.width  = o.width;
@@ -108,4 +108,13 @@ nlohmann::json tracks_to_json(std::vector<Frame_Track> f)
 {
     nlohmann::json result;
     return result;
+}
+
+std::string timepoint_to_ISO8601(const std::chrono::system_clock::time_point& tp) 
+{
+    auto time_t_point = std::chrono::system_clock::to_time_t(tp);
+    std::stringstream ss;
+    ss << std::put_time(gmtime(&time_t_point), "%FT%TZ");
+    
+    return ss.str();
 }
