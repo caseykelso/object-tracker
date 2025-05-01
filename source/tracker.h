@@ -2,35 +2,41 @@
 //#define DEBUG 1
 
 // Maximum bipartite matching solver using Edmonds-Karp algorithm
-class MaximumBipartiteMatching {
+class MaximumBipartiteMatching 
+{
 private:
-    std::vector<std::vector<Edge>> graph;  // Adjacency list representation
-    int source;                            // Source vertex
-    int sink;                              // Sink vertex
-    int vertices;                          // Number of vertices in the graph
+    std::vector<std::vector<Edge>> graph;
+    int source;                          
+    int sink;                            
+    int vertices;                        
 
     // BFS to find augmenting path
-    bool bfs(std::vector<int>& parent) {
+    bool bfs(std::vector<int>& parent) 
+    {
         std::fill(parent.begin(), parent.end(), -1);
         parent[source] = -2;  // Mark source as visited
         
         std::queue<int> queue;
         queue.push(source);
         
-        while (!queue.empty()) {
+        while (!queue.empty()) 
+        {
             int current = queue.front();
             queue.pop();
             
-            for (int i = 0; i < graph[current].size(); i++) {
+            for (int i = 0; i < graph[current].size(); i++) 
+            {
                 Edge& edge = graph[current][i];
                 int next = edge.to;
                 
                 // If not visited and has capacity
-                if (parent[next] == -1 && edge.capacity - edge.flow > 0) {
+                if (parent[next] == -1 && edge.capacity - edge.flow > 0) 
+                {
                     parent[next] = current;
                     parent[vertices + next] = i;  // Store the edge index
                     
-                    if (next == sink) {
+                    if (next == sink) 
+                    {
                         return true;  // Path to sink found
                     }
                     
@@ -39,16 +45,18 @@ private:
             }
         }
         
-        return false;  // No augmenting path found
+        return false;  
     }
 
 public:
-    MaximumBipartiteMatching(int num_vertices, int s, int t) : vertices(num_vertices), source(s), sink(t) {
+    MaximumBipartiteMatching(int num_vertices, int s, int t) : vertices(num_vertices), source(s), sink(t) 
+    {
         graph.resize(vertices);
     }
     
     // Add an edge to the graph (and its reverse)
-    void addEdge(int from, int to, int capacity) {
+    void addEdge(int from, int to, int capacity) 
+    {
         // Forward edge
         graph[from].push_back(Edge(to, capacity, 0, graph[to].size()));
         // Reverse edge with 0 capacity (for residual network)
@@ -56,21 +64,25 @@ public:
     }
     
     // Find maximum matching
-    int maxFlow() {
+    int maxFlow() 
+    {
         int total_flow = 0;
         std::vector<int> parent(2 * vertices, -1);  // Parent array for BFS
         
-        while (bfs(parent)) {
+        while (bfs(parent)) 
+        {
             // Find minimum residual capacity along the augmenting path
             int path_flow = std::numeric_limits<int>::max();
-            for (int v = sink; v != source; v = parent[v]) {
+            for (int v = sink; v != source; v = parent[v]) 
+            {
                 int u = parent[v];
                 int edge_idx = parent[vertices + v];
                 path_flow = std::min(path_flow, graph[u][edge_idx].capacity - graph[u][edge_idx].flow);
             }
             
             // Update residual capacities and flows
-            for (int v = sink; v != source; v = parent[v]) {
+            for (int v = sink; v != source; v = parent[v]) 
+            {
                 int u = parent[v];
                 int edge_idx = parent[vertices + v];
                 
@@ -85,15 +97,19 @@ public:
     }
     
     // Retrieve matching pairs
-    std::vector<std::pair<int, int>> getMatching(int num_left, int num_right) {
+    std::vector<std::pair<int, int>> getMatching(int num_left, int num_right) 
+    {
         std::vector<std::pair<int, int>> matches;
         
         // Check edges from left partition (excluding source and sink)
-        for (int left = 1; left <= num_left; left++) {
-            for (const Edge& edge : graph[left]) {
+        for (int left = 1; left <= num_left; left++) 
+        {
+            for (const Edge& edge : graph[left]) 
+            {
                 // Only consider edges to right partition with flow
-                if (edge.flow > 0 && edge.to > num_left && edge.to <= num_left + num_right) {
-                    matches.push_back(std::make_pair(left - 1, edge.to - num_left - 1));  // Adjust indices
+                if (edge.flow > 0 && edge.to > num_left && edge.to <= num_left + num_right) 
+                {
+                    matches.push_back(std::make_pair(left - 1, edge.to - num_left - 1)); 
                 }
             }
         }
@@ -103,10 +119,12 @@ public:
 };
 
 // IoU-based 2D object tracker with object persistence
-class IoUTracker {
+class IoUTracker 
+{
 private:
     // Structure to track object state across frames
-    struct TrackedObject {
+    struct TrackedObject 
+    {
         Object2D object;              // The object data
         int frames_since_last_match;  // Counter for frames without a match
         bool is_active;               // Whether the object is currently active
@@ -121,7 +139,8 @@ private:
     int max_frames_to_keep;      // Maximum frames to keep without a match
     
     // Calculate IoU (Intersection over Union) between two objects
-    double calculateIoU(const Object2D& obj1, const Object2D& obj2) {
+    double calculateIoU(const Object2D& obj1, const Object2D& obj2) 
+    {
         // Calculate the boundaries of each box
         float left1 = obj1.x - obj1.width / 2.0f;
         float right1 = obj1.x + obj1.width / 2.0f;
@@ -149,7 +168,8 @@ private:
         float union_area = area1 + area2 - intersection_area;
         
         // Return IoU
-        if (union_area > 0) {
+        if (union_area > 0) 
+        {
             return intersection_area / union_area;
         }
         return 0.0;  // No overlap
@@ -157,7 +177,8 @@ private:
     
     // Convert IoU to an integer capacity (higher IoU = higher capacity)
     int iouToCapacity(double iou) {
-        if (iou < min_iou_threshold) {
+        if (iou < min_iou_threshold) 
+        {
             return 0;  // No edge if IoU too small
         }
         
