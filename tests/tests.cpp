@@ -69,6 +69,26 @@ TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
         EXPECT_EQ(3, tracks_all_active.size());
     }
 
+    // lets see that object again and confirm that it has the same ID
+    tracks_detected = tracker.update(f0.detections);
+    tracks_all_active = tracker.getActiveTrackedObjects();
+    EXPECT_EQ(3, tracks_all_active.size());
+
+    track_id = 0;
+    for (auto& t: tracks_all_active)
+    {
+       EXPECT_EQ(track_id, t.id);
+       ++track_id;
+    }
+
+    // ok, now let's remove the object for 10 more frames
+    for (uint8_t i = 0; i < 10; ++i)
+    {
+        tracks_detected = tracker.update(f1.detections);
+        tracks_all_active = tracker.getActiveTrackedObjects();
+        EXPECT_EQ(3, tracks_all_active.size());
+    }
+
     // track is marked as inactive   
     tracks_detected = tracker.update(f1.detections);
     tracks_all_active = tracker.getActiveTrackedObjects();
