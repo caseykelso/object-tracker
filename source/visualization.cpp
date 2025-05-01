@@ -37,7 +37,7 @@ bool draw_detections_and_tracks(Frame_Track ft, std::vector<Object2D> detections
             );
     }
 
-        for (const auto& t : ft.tracks)
+        for (const auto& t : ft.tracked_objects)
         {
             // draw a red border if an object is being tracked / even if it isn't detected
             cv::rectangle(

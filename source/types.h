@@ -62,10 +62,10 @@ struct Frame_Track
 {
     uint32_t frame_id;
     std::string timestamp;
-    std::vector<Track> tracks;
+    std::vector<Track> tracked_objects;
 
-    Frame_Track(uint32_t id, std::string t, std::vector<Track> ts) : frame_id(id), timestamp(t), tracks(ts) {}
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_ONLY_SERIALIZE(Frame_Track, frame_id,timestamp, tracks)
+    Frame_Track(uint32_t id, std::string t, std::vector<Track> ts) : frame_id(id), timestamp(t), tracked_objects(ts) {}
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_ONLY_SERIALIZE(Frame_Track, frame_id,timestamp, tracked_objects)
 };
 
 
