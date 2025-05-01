@@ -33,28 +33,32 @@ bool draw_detections(Frame_Track ft)
     };
     
     // Draw the squares on the image
-    for (const auto& square : squares) {
+//    for (const auto& square : squares) {
         // Draw a filled square
-        cv::rectangle(
-            image, 
-            square.pos, 
-            cv::Point(square.pos.x + square.size, square.pos.y + square.size), 
-            square.color, 
-            -1  // Filled rectangle
-        );
-        
-        // Draw a black border around the square
-        cv::rectangle(
-            image, 
-            square.pos, 
-            cv::Point(square.pos.x + square.size, square.pos.y + square.size), 
-            cv::Scalar(0, 0, 0),
-            2  // Border thickness
-        );
-    }
+        for (const auto& t : ft.tracks)
+        {
+            cv::rectangle(
+                image, 
+                cv::Point(t.x*1000, t.y*1000), 
+                cv::Point(t.x*1000 + t.width*1000, t.y*1000 + t.height*1000), 
+                {255, 0, 0}, 
+                -1  // Filled rectangle
+            );
+#if 0 
+            // Draw a black border around the square
+            cv::rectangle(
+                image, 
+                square.pos, 
+                cv::Point(square.pos.x + square.size, square.pos.y + square.size), 
+                cv::Scalar(0, 0, 0),
+                2  // Border thickness
+            );
+#endif
+        }
     
     // Save the image as PNG
-    cv::imwrite("squares_on_plane.png", image);
+        std::cout << "frame id: " << std::to_string(ft.frame_id) << std::endl;
+    cv::imwrite("tracking-frame-"+std::to_string(ft.frame_id)+".png", image);
     
     std::cout << "Image saved as 'squares_on_plane.png'" << std::endl;
 

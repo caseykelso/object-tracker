@@ -40,6 +40,7 @@ Frame_Detection json_to_detection(nlohmann::json j) // parse a single frame
 {
     Frame_Detection f;
 
+    f.frame_id = j["frame_id"];
     std::string s(j["timestamp"]);
     std::istringstream ss(s);
 
