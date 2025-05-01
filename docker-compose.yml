@@ -1,8 +1,9 @@
 version: '3'
 
 services:
-  ubuntu:
+  tracking-solution:
     build: .
+    image: tracking-solution:latest
     volumes:
       - ~/.ssh:/root/.ssh:ro
       - ~/.gitconfig:/root/.gitconfig

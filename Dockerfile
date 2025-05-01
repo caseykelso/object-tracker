@@ -24,8 +24,11 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
 
 # Set working directory
-WORKDIR /root
+WORKDIR /workspace
 
-# Run bash shell
-CMD ["/bin/bash"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["make clean ci tests run"]
+
 
