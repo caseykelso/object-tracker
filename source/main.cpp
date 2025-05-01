@@ -59,7 +59,7 @@ int main(int argc, char **argv)
            auto tracks = tracker.getActiveTrackedObjects();
            Frame_Track ft(frame_id, timestamp, tracks);
            track_frames.push_back(ft);
-           draw_detections(ft);
+           draw_detections_and_tracks(ft, objects);
         }
 
         //TODO: sort out floating point precision lost on round-trip of json
