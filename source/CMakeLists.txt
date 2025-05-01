@@ -8,7 +8,7 @@ project(tracker-rbr)
 
 find_package(OpenCV REQUIRED)
 
-add_executable(tracker_rbr main.cpp)
+add_executable(tracker_rbr main.cpp visualization.cpp)
 
 add_library(tracker SHARED tracker.cpp serialization.cpp)
 

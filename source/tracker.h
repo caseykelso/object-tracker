@@ -189,7 +189,7 @@ private:
 
 public:
     // Constructor with IoU threshold and frames to keep parameters
-    IoUTracker(double iou_threshold = 0.3, int frames_to_keep = 10) 
+    IoUTracker(double iou_threshold = 0.3, int frames_to_keep = 3) 
         : next_id(0), min_iou_threshold(iou_threshold), max_frames_to_keep(frames_to_keep) {}
 
     // Process new detections and match with existing tracks using IoU

@@ -60,8 +60,8 @@ TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
        ++track_id;
     }
 
-    // confirm that the object persists for 9 more frames
-    for (uint8_t i = 0; i < 9; ++i)
+    // confirm that the object persists for 2 more frames
+    for (uint8_t i = 0; i < 2; ++i)
     {
         tracks_detected = tracker.update(f1.detections);
         tracks_all_active = tracker.getActiveTrackedObjects();
@@ -80,8 +80,8 @@ TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
        ++track_id;
     }
 
-    // ok, now let's remove the object for 10 more frames
-    for (uint8_t i = 0; i < 10; ++i)
+    // ok, now let's remove the object for 3 more frames
+    for (uint8_t i = 0; i < 3; ++i)
     {
         tracks_detected = tracker.update(f1.detections);
         tracks_all_active = tracker.getActiveTrackedObjects();

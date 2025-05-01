@@ -1,12 +1,13 @@
 #include "docopt/docopt.h"
 #include <iostream>
 #include <nlohmann/json.hpp>
-#include "types.h"
-#include "serialization.h"
 #include <queue>
 #include <fstream>
 #include <string>
-#include <tracker.h>
+#include "types.h"
+#include "serialization.h"
+#include "tracker.h"
+#include "visualization.h"
 
 using json = nlohmann::json;
 
@@ -58,6 +59,7 @@ int main(int argc, char **argv)
            auto tracks = tracker.getActiveTrackedObjects();
            Frame_Track ft(frame_id, timestamp, tracks);
            track_frames.push_back(ft);
+           draw_detections(ft);
         }
 
         //TODO: sort out floating point precision lost on round-trip of json
