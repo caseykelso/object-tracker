@@ -12,7 +12,7 @@
 using json = nlohmann::json;
 
 static const char USAGE[] =
-    R"(RedBarnRobotics
+    R"(tracker
 
     Usage:
       tracker_rbr --input=<filename> --output=<filename> --vis-dir=<filename>
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 {
     std::map<std::string, docopt::value> args;
 
-    args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Red Barn Robotics Cabbage Tracker 0.1");
+    args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "tracker 0.1");
 
     std::string frames_path = args["--input"].asString();
     std::string tracks_path = args["--output"].asString();
