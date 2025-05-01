@@ -9,7 +9,6 @@ project(tracker-rbr)
 find_package(OpenCV REQUIRED)
 
 add_executable(tracker_rbr main.cpp)
-add_executable(viz visualization.cpp)
 
 add_library(tracker SHARED tracker.cpp serialization.cpp)
 
@@ -21,9 +20,8 @@ include_directories(BEFORE ${OpenCV_INCLUDE_DIRS} ${CMAKE_PREFIX_PATH}/include $
 target_link_directories(tracker BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
 target_link_directories(tracker_rbr BEFORE PUBLIC ${CMAKE_PREFIX_PATH}/lib)
 target_link_libraries(tracker_rbr docopt ${OpenCV_LIBS} tracker pthread rt)
-target_link_libraries(viz caca pthread rt)
 
 install(FILES types.h tracker.h serialization.h DESTINATION include)
 install(TARGETS tracker DESTINATION lib)
 install(TARGETS tracker_rbr DESTINATION bin)
-install(TARGETS viz DESTINATION bin)
+

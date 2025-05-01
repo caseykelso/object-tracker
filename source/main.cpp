@@ -60,6 +60,7 @@ int main(int argc, char **argv)
            track_frames.push_back(ft);
         }
 
+        //TODO: sort out floating point precision lost on round-trip of json
         std::ofstream tracks_file(tracks_path);
         json track_json;
         json json_track_frames = track_frames;
