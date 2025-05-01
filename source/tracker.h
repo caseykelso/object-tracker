@@ -1,4 +1,5 @@
 #pragma once
+//#define DEBUG 1
 
 // Maximum bipartite matching solver using Edmonds-Karp algorithm
 class MaximumBipartiteMatching {
@@ -101,17 +102,26 @@ public:
     }
 };
 
-// IoU-based 2D object tracker
-class IoUTracker 
-{
+// IoU-based 2D object tracker with object persistence
+class IoUTracker {
 private:
-    std::vector<Object2D> previous_objects;
+    // Structure to track object state across frames
+    struct TrackedObject {
+        Object2D object;              // The object data
+        int frames_since_last_match;  // Counter for frames without a match
+        bool is_active;               // Whether the object is currently active
+        
+        TrackedObject(const Object2D& obj) 
+            : object(obj), frames_since_last_match(0), is_active(true) {}
+    };
+    
+    std::vector<TrackedObject> tracked_objects;  // All tracked objects (active and inactive)
     int next_id;
     double min_iou_threshold;    // Minimum IoU to consider a match
+    int max_frames_to_keep;      // Maximum frames to keep without a match
     
     // Calculate IoU (Intersection over Union) between two objects
-    double calculateIoU(const Object2D& obj1, const Object2D& obj2) 
-    {
+    double calculateIoU(const Object2D& obj1, const Object2D& obj2) {
         // Calculate the boundaries of each box
         float left1 = obj1.x - obj1.width / 2.0f;
         float right1 = obj1.x + obj1.width / 2.0f;
@@ -139,18 +149,15 @@ private:
         float union_area = area1 + area2 - intersection_area;
         
         // Return IoU
-        if (union_area > 0) 
-        {
+        if (union_area > 0) {
             return intersection_area / union_area;
         }
         return 0.0;  // No overlap
     }
     
     // Convert IoU to an integer capacity (higher IoU = higher capacity)
-    int iouToCapacity(double iou) 
-    {
-        if (iou < min_iou_threshold) 
-        {
+    int iouToCapacity(double iou) {
+        if (iou < min_iou_threshold) {
             return 0;  // No edge if IoU too small
         }
         
@@ -160,61 +167,100 @@ private:
     }
 
 public:
-    // Constructor with IoU threshold parameter
-    IoUTracker(double iou_threshold = 0.3, uint8_t max_missing_frames = 10) 
-        : next_id(0), min_iou_threshold(iou_threshold) {}
+    // Constructor with IoU threshold and frames to keep parameters
+    IoUTracker(double iou_threshold = 0.3, int frames_to_keep = 10) 
+        : next_id(0), min_iou_threshold(iou_threshold), max_frames_to_keep(frames_to_keep) {}
 
     // Process new detections and match with existing tracks using IoU
     std::vector<Object2D> update(const std::vector<Object2D>& detections) 
     {
-        std::vector<Object2D> current_objects = detections;
+        std::vector<Object2D> current_detections = detections;
+#ifdef DEBUG
+        std::cout << "UPDATE" << std::endl;
+#endif //DEBUG
         
-        // First frame or no previous objects
-        if (previous_objects.empty()) 
+        // If this is the first frame, initialize all objects with new IDs
+        if (tracked_objects.empty()) 
         {
-            // Assign new IDs to all detections
-            for (auto& obj : current_objects) 
-            {
-                obj.id = next_id++;
+#ifdef DEBUG
+            std::cout << "EMPTY" << std::endl;
+#endif //DEBUG
+            for (auto& detection : current_detections) {
+                std::cout << "!" << std::endl;
+                detection.id = next_id++;
+                tracked_objects.push_back(TrackedObject(detection));
             }
-
-            previous_objects = current_objects;
-            return current_objects;
+            return current_detections;
         }
-
-        int n_prev = previous_objects.size();
-        int n_curr = current_objects.size();
+        
+        // Get only active objects for matching
+        std::vector<Object2D> active_objects;
+        std::vector<int> active_indices;
+        
+        for (size_t i = 0; i < tracked_objects.size(); i++) {
+            if (tracked_objects[i].is_active) {
+                active_objects.push_back(tracked_objects[i].object);
+                active_indices.push_back(i);
+#ifdef DEBUG
+                std::cout << "ACTIVE" << std::endl;
+#endif //DEBUG
+            }
+        }
+        
+        int n_prev = active_objects.size();
+        int n_curr = current_detections.size();
+        
+        // If no active objects or no current detections, handle accordingly
+        if (n_prev == 0) {
+            // All new detections get new IDs
+            for (auto& detection : current_detections) {
+                detection.id = next_id++;
+                tracked_objects.push_back(TrackedObject(detection));
+            }
+            return current_detections;
+        }
+        
+        if (n_curr == 0) {
+            // Increment counters for all active objects and mark as inactive if needed
+            for (auto& tracked_obj : tracked_objects) {
+                if (tracked_obj.is_active) {
+                    tracked_obj.frames_since_last_match++;
+                    if (tracked_obj.frames_since_last_match > max_frames_to_keep) {
+                        tracked_obj.is_active = false;
+#ifdef DEBUG
+                        std::cout << "INACTIVE" << std::endl;
+#endif // DEBUG
+                    }
+                }
+            }
+            return {};  // Return empty vector as no current detections
+        }
         
         // Create a flow network for bipartite matching
-        // Vertices: source(0) + previous objects(1 to n_prev) + current objects(n_prev+1 to n_prev+n_curr) + sink(n_prev+n_curr+1)
+        // Vertices: source(0) + active objects(1 to n_prev) + current detections(n_prev+1 to n_prev+n_curr) + sink(n_prev+n_curr+1)
         int source = 0;
         int sink = n_prev + n_curr + 1;
         int total_vertices = sink + 1;
         
         MaximumBipartiteMatching network(total_vertices, source, sink);
         
-        // Connect source to all previous objects with capacity 1
-        for (int i = 1; i <= n_prev; i++) 
-        {
+        // Connect source to all active objects with capacity 1
+        for (int i = 1; i <= n_prev; i++) {
             network.addEdge(source, i, 1);
         }
         
-        // Connect current objects to sink with capacity 1
-        for (int j = 1; j <= n_curr; j++) 
-        {
+        // Connect current detections to sink with capacity 1
+        for (int j = 1; j <= n_curr; j++) {
             network.addEdge(n_prev + j, sink, 1);
         }
         
-        // Connect previous objects to current objects with capacity based on IoU
-        for (int i = 0; i < n_prev; i++) 
-        {
-            for (int j = 0; j < n_curr; j++) 
-            {
-                double iou = calculateIoU(previous_objects[i], current_objects[j]);
+        // Connect active objects to current detections with capacity based on IoU
+        for (int i = 0; i < n_prev; i++) {
+            for (int j = 0; j < n_curr; j++) {
+                double iou = calculateIoU(active_objects[i], current_detections[j]);
                 int capacity = iouToCapacity(iou);
                 
-                if (capacity > 0) 
-                {
+                if (capacity > 0) {
                     network.addEdge(i + 1, n_prev + j + 1, capacity);
                 }
             }
@@ -228,36 +274,85 @@ public:
         
         // Mark all current detections as unassigned initially
         std::vector<bool> assigned_curr(n_curr, false);
+       
+        // assume non-match, increment all frame counters now, easier to reset them upon match 
+        for (auto& tracked_obj : tracked_objects) {
+            if (tracked_obj.is_active) {
+                tracked_obj.frames_since_last_match++;
+            }
+        }
         
-        // Assign IDs based on matching
-        for (const auto& match : matches) 
-        {
-            int prev_idx = match.first;
+        // update ids and reset counters for matched objects
+        for (const auto& match : matches) {
+            int active_idx = match.first;
             int curr_idx = match.second;
             
-            current_objects[curr_idx].id = previous_objects[prev_idx].id;
+            // Get the actual index in tracked_objects
+            int tracked_idx = active_indices[active_idx];
+            
+            // Update current detection with matched ID
+            current_detections[curr_idx].id = tracked_objects[tracked_idx].object.id;
+            
+            // Reset counter for this object
+            tracked_objects[tracked_idx].frames_since_last_match = 0;
+            
+            // Update object position and dimensions
+            tracked_objects[tracked_idx].object = current_detections[curr_idx];
+            
+            // Mark as assigned
             assigned_curr[curr_idx] = true;
         }
         
-        // Assign new IDs to unmatched detections
+        // Check for objects to deactivate (exceeded max frames without match)
+        for (auto& tracked_obj : tracked_objects) 
+        {
+            if (tracked_obj.is_active && tracked_obj.frames_since_last_match > max_frames_to_keep) 
+            {
+                tracked_obj.is_active = false;
+#ifdef DEBUG
+                std::cout << "*********************" << std::endl;
+#endif //DEBUG
+            }
+        }
+        
+        // Assign new IDs to unmatched detections and add to tracked objects
         for (int i = 0; i < n_curr; i++) 
         {
             if (!assigned_curr[i]) 
             {
-                current_objects[i].id = next_id++;
+                current_detections[i].id = next_id++;
+                std::cout << "#" << std::endl;
+                tracked_objects.push_back(TrackedObject(current_detections[i]));
             }
         }
         
-        // Update previous objects for next frame
-        previous_objects = current_objects;
-        
-        return current_objects;
+        // Return all current detections with assigned IDs
+        return current_detections;
+    }
+    
+    // Get all currently tracked objects (including inactive ones that are kept for persistence)
+    std::vector<Object2D> getAllTrackedObjects() const {
+        std::vector<Object2D> result;
+        for (const auto& tracked_obj : tracked_objects) {
+            result.push_back(tracked_obj.object);
+        }
+        return result;
+    }
+    
+    // Get only active tracked objects
+    std::vector<Object2D> getActiveTrackedObjects() const {
+        std::vector<Object2D> result;
+        for (const auto& tracked_obj : tracked_objects) {
+            if (tracked_obj.is_active) {
+                result.push_back(tracked_obj.object);
+            }
+        }
+        return result;
     }
     
     // Reset the tracker
-    void reset() 
-    {
-        previous_objects.clear();
+    void reset() {
+        tracked_objects.clear();
         next_id = 0;
     }
 };

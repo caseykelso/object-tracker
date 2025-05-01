@@ -35,11 +35,72 @@ TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
     Frame f0(detections0);
     Frame f1(detections1);
 
-    auto tracks = tracker.update(f0.detections);
-    EXPECT_EQ(3, tracks.size());
+    auto tracks_detected = tracker.update(f0.detections);
+    EXPECT_EQ(3, tracks_detected.size());
+    tracks_detected = tracker.update(f0.detections);
 
-    tracks = tracker.update(f1.detections);
-    EXPECT_EQ(3, tracks.size());
+    auto tracks_all_active = tracker.getAllTrackedObjects();
+    EXPECT_EQ(3, tracks_all_active.size());
+
+    uint8_t track_id = 0;
+    for (auto& t: tracks_all_active)
+    {
+       EXPECT_EQ(track_id, t.id);
+       ++track_id;
+    }
+
+    tracks_detected = tracker.update(f1.detections);
+    tracks_all_active = tracker.getActiveTrackedObjects();
+    EXPECT_EQ(3, tracks_all_active.size());
+
+    // confirm that the track IDs still match, and we haven't generated a new track id
+    track_id = 0;
+    for (auto& t: tracks_all_active)
+    {
+       EXPECT_EQ(track_id, t.id);
+       ++track_id;
+    }
+
+    // confirm that the object persists for 9 more frames
+    for (uint8_t i = 0; i < 9; ++i)
+    {
+        tracks_detected = tracker.update(f1.detections);
+        tracks_all_active = tracker.getActiveTrackedObjects();
+        EXPECT_EQ(3, tracks_all_active.size());
+    }
+
+    // track is marked as inactive   
+    tracks_detected = tracker.update(f1.detections);
+    tracks_all_active = tracker.getActiveTrackedObjects();
+    EXPECT_EQ(2, tracks_all_active.size());
+
+    // introduce new object and confirm that it receives a new ID
+    tracks_detected = tracker.update(f0.detections);
+    tracks_all_active = tracker.getActiveTrackedObjects();
+    EXPECT_EQ(3, tracks_all_active.size());
+
+    auto t = tracks_all_active.back();
+    EXPECT_EQ(3, t.id);
+    tracks_detected.pop_back();
+    t = tracks_detected.back();
+    EXPECT_EQ(3, t.id); // skip 1 as it was marked as inactive
+    tracks_detected.pop_back();
+    t = tracks_detected.back();
+    assert(!tracks_detected.empty());
+    EXPECT_EQ(0, t.id); // new object
+
+
+//    tracks = tracker.update(f1.detections);
+#if 0
+    track_id = 0;
+    for (auto& t: tracks)
+    {
+       EXPECT_EQ(track_id, t.id);
+       ++track_id;
+    }
+#endif
+
+//    EXPECT_EQ(2, tracks.size());
 #if 0
     for (uint8_t i = 0; i < 2; ++i)
     {
@@ -47,6 +108,7 @@ TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
         EXPECT_EQ(3, tracks.size());
     }
 #endif
+
 
     for (auto& f: frames)
     {
