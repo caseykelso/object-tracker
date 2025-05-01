@@ -10,7 +10,7 @@ find_package(OpenCV REQUIRED)
 
 add_executable(tracker_rbr main.cpp visualization.cpp)
 
-add_library(tracker SHARED tracker.cpp serialization.cpp)
+add_library(tracker STATIC tracker.cpp serialization.cpp)
 
 set_target_properties(tracker PROPERTIES PUBLIC_HEADER tracker.h)
 set_target_properties(tracker PROPERTIES PUBLIC_HEADER types.h)
