@@ -15,15 +15,16 @@ static const char USAGE[] =
     R"(RedBarnRobotics
 
     Usage:
-      tracker_rbr --input=<filename> --output=<filename>
+      tracker_rbr --input=<filename> --output=<filename> --vis-dir=<filename>
       tracker_rbr (-h | --help)
       tracker_rbr --version
 
     Options:
       -h --help             Show this help message
       --version             Show version
-      --frames=<filename>   Frame data input path
-      --tracks=<filename>   Tracks output path
+      --input=<filename>    Frame data input path
+      --output=<filename>   Tracks output path
+      --vis-dir=<filename>  Visualization output directory
 )";
 
 int main(int argc, char **argv)
@@ -34,9 +35,16 @@ int main(int argc, char **argv)
 
     std::string frames_path = args["--input"].asString();
     std::string tracks_path = args["--output"].asString();
+    std::string viz_path = args["--vis-dir"].asString();
+
+    if ('/' != viz_path.back())
+    {
+        viz_path = viz_path + '/';
+    }
 
     std::cout << "input file: " << frames_path << std::endl;
     std::cout << "output file: " << tracks_path << std::endl;
+    std::cout << "vis dir: " << viz_path << std::endl;
 
     std::ifstream json_file(frames_path);
 
@@ -59,7 +67,7 @@ int main(int argc, char **argv)
            auto tracks = tracker.getActiveTrackedObjects();
            Frame_Track ft(frame_id, timestamp, tracks);
            track_frames.push_back(ft);
-           draw_detections_and_tracks(ft, objects);
+           draw_detections_and_tracks(ft, objects, viz_path);
         }
 
         //TODO: sort out floating point precision lost on round-trip of json
@@ -76,3 +84,4 @@ int main(int argc, char **argv)
     }
     return 0;
 }
+

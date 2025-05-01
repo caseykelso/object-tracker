@@ -32,10 +32,7 @@ init: .FORCE
 	mkdir -p $(INSTALLED.HOST.DIR)
 
 run: .FORCE
-	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
-
-viz: build
-	$(INSTALLED.HOST.DIR)/bin/viz
+	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json --vis-dir=$(BASE.DIR)/docs
 
 tests: .FORCE
 	mkdir -p $(BUILD.TESTS.DIR)

@@ -17,7 +17,7 @@ struct Square {
     cv::Scalar color;
 };
 
-bool draw_detections_and_tracks(Frame_Track ft, std::vector<Object2D> detections)
+bool draw_detections_and_tracks(Frame_Track ft, std::vector<Object2D> detections, std::string output_dir)
 {
     bool result = true;
     const int width = 1000;
@@ -59,7 +59,7 @@ bool draw_detections_and_tracks(Frame_Track ft, std::vector<Object2D> detections
         }
     
     // Save the image as PNG
-    cv::imwrite("tracking-frame-"+std::to_string(ft.frame_id)+".png", image);
+    cv::imwrite(output_dir+"tracking-frame-"+std::to_string(ft.frame_id)+".png", image);
     
     std::cout << "Image saved as 'tracking-frame-"+std::to_string(ft.frame_id)+".png'" << std::endl;
 
