@@ -186,7 +186,6 @@ public:
             std::cout << "EMPTY" << std::endl;
 #endif //DEBUG
             for (auto& detection : current_detections) {
-                std::cout << "!" << std::endl;
                 detection.id = next_id++;
                 tracked_objects.push_back(TrackedObject(detection));
             }
@@ -321,7 +320,6 @@ public:
             if (!assigned_curr[i]) 
             {
                 current_detections[i].id = next_id++;
-                std::cout << "#" << std::endl;
                 tracked_objects.push_back(TrackedObject(current_detections[i]));
             }
         }
