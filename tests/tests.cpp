@@ -98,38 +98,6 @@ TEST(TrackerTests, THREE_OBJECTS_MANY_FRAMES_ONE_DISAPPEAR)
     tracks_all_active = tracker.getActiveTrackedObjects();
     EXPECT_EQ(3, tracks_all_active.size());
 
-// TODO: this is failing needs debugging
-#if  0
-    auto t = tracks_all_active.back();
-    EXPECT_EQ(3, t.id);
-    tracks_detected.pop_back();
-    t = tracks_all_active.back();
-    EXPECT_EQ(3, t.id); // skip 1 as it was marked as inactive
-    tracks_detected.pop_back();
-    t = tracks_all_active.back();
-    assert(!tracks_detected.empty());
-    EXPECT_EQ(3, t.id); // new object
-#endif
-
-//    tracks = tracker.update(f1.detections);
-#if 0
-    track_id = 0;
-    for (auto& t: tracks)
-    {
-       EXPECT_EQ(track_id, t.id);
-       ++track_id;
-    }
-#endif
-
-//    EXPECT_EQ(2, tracks.size());
-#if 0
-    for (uint8_t i = 0; i < 2; ++i)
-    {
-        tracks = tracker.update(f1.detections);
-        EXPECT_EQ(3, tracks.size());
-    }
-#endif
-
 
     for (auto& f: frames)
     {
