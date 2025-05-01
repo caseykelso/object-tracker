@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
     nlohmann-json3-dev \
     cmake \
     libdocopt-dev \
+    libcaca-dev \
+    clang-format \
+    libboost-all-dev \
+    vim \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

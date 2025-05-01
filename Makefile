@@ -32,12 +32,12 @@ init: .FORCE
 	mkdir -p $(INSTALLED.HOST.DIR)
 
 run: .FORCE
-	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json
+	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(INSTALLED.HOST.DIR)/bin/tracker_rbr --input=$(DATA.DIR)/frames.json --output=$(BASE.DIR)/tracks.json --vis-dir=$(BASE.DIR)/docs
 
 tests: .FORCE
 	mkdir -p $(BUILD.TESTS.DIR)
 	cd $(BUILD.TESTS.DIR) && cmake -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) $(TESTS.DIR) && make -j$(J) install
-	$(INSTALLED.HOST.DIR)/bin/tracker_rbr_tests
+	LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib $(INSTALLED.HOST.DIR)/bin/tracker_rbr_tests
 
 version: .FORCE
 	$(INSTALLED.HOST.DIR)/bin/tracker_rbr --version
@@ -51,6 +51,8 @@ clean: .FORCE
 ctags: .FORCE
 	cd $(BASE.DIR) && ctags -R --exclude=.git --exclude=downloads --exclude=installed.host --exclude=installed.target --exclude=documents  --exclude=build.*  .
 
+clangformat: .FORCE
+	clang-format -i source/*.h source/*.cpp --style=Microsoft
 .FORCE:
 
 
